@@ -106,7 +106,7 @@
 #include <stdint.h>
 
 //6502 defines
-#define UNDOCUMENTED //when this is defined, undocumented opcodes are handled.
+//#define UNDOCUMENTED //when this is defined, undocumented opcodes are handled.
                      //otherwise, they're simply treated as NOPs.
 
 //#define NES_CPU      //when this is defined, the binary-coded decimal (BCD)
@@ -114,7 +114,7 @@
                      //CPU in the Nintendo Entertainment System does not
                      //support BCD operation.
 
-#define SPC  // Sunplus SPC81A -- No Y register
+#define SPC_CPU  // Sunplus SPC81A -- No Y register, no decimal mode flag
 
 #define FLAG_CARRY     0x01
 #define FLAG_ZERO      0x02
@@ -169,7 +169,11 @@
 
 //6502 CPU registers
 uint16_t pc;
+#ifdef SPC_CPU
+uint8_t sp, a, x, status;
+#else
 uint8_t sp, a, x, y, status;
+#endif
 
 
 //helper variables
@@ -208,7 +212,9 @@ void reset6502() {
     pc = (uint16_t)read6502(0xFFFC) | ((uint16_t)read6502(0xFFFD) << 8);
     a = 0;
     x = 0;
+#ifndef SPC_CPU
     y = 0;
+#endif
     sp = 0xFD;
     status |= FLAG_CONSTANT;
 }
@@ -238,7 +244,9 @@ static void zpx() { //zero-page,X
 }
 
 static void zpy() { //zero-page,Y
+#ifndef SPC_CPU
     ea = ((uint16_t)read6502((uint16_t)pc++) + (uint16_t)y) & 0xFF; //zero-page wraparound
+#endif
 }
 
 static void rel() { //relative for branch ops (8-bit immediate value, sign-extended)
@@ -265,6 +273,7 @@ static void absx() { //absolute,X
 }
 
 static void absy() { //absolute,Y
+#ifndef SPC_CPU
     uint16_t startpage;
     ea = ((uint16_t)read6502(pc) | ((uint16_t)read6502(pc+1) << 8));
     startpage = ea & 0xFF00;
@@ -275,6 +284,7 @@ static void absy() { //absolute,Y
     }
 
     pc += 2;
+#endif
 }
 
 static void ind() { //indirect
@@ -292,6 +302,7 @@ static void indx() { // (indirect,X)
 }
 
 static void indy() { // (indirect),Y
+#ifndef SPC_CPU
     uint16_t eahelp, eahelp2, startpage;
     eahelp = (uint16_t)read6502(pc++);
     eahelp2 = (eahelp & 0xFF00) | ((eahelp + 1) & 0x00FF); //zero-page wraparound
@@ -302,6 +313,7 @@ static void indy() { // (indirect),Y
     if (startpage != (ea & 0xFF00)) { //one cycle penlty for page-crossing on some opcodes
         penaltyaddr = 1;
     }
+#endif
 }
 
 static uint16_t getvalue() {
@@ -330,7 +342,8 @@ static void adc() {
     overflowcalc(result, a, value);
     signcalc(result);
     
-    #ifndef NES_CPU
+    //#ifndef NES_CPU
+    #if ! (defined (NES_CPU) || defined (SPC_CPU))
     if (status & FLAG_DECIMAL) {
         clearcarry();
         
@@ -498,6 +511,7 @@ static void cpx() {
     signcalc(result);
 }
 
+#ifndef SPC_CPU
 static void cpy() {
     value = getvalue();
     result = (uint16_t)y - value;
@@ -508,6 +522,7 @@ static void cpy() {
         else clearzero();
     signcalc(result);
 }
+#endif
 
 static void dec() {
     value = getvalue();
@@ -526,12 +541,14 @@ static void dex() {
     signcalc(x);
 }
 
+#ifndef SPC_CPU
 static void dey() {
     y--;
    
     zerocalc(y);
     signcalc(y);
 }
+#endif
 
 static void eor() {
     penaltyop = 1;
@@ -561,12 +578,14 @@ static void inx() {
     signcalc(x);
 }
 
+#ifndef SPC_CPU
 static void iny() {
     y++;
    
     zerocalc(y);
     signcalc(y);
 }
+#endif
 
 static void jmp() {
     pc = ea;
@@ -595,6 +614,7 @@ static void ldx() {
     signcalc(x);
 }
 
+#ifndef SPC_CPU
 static void ldy() {
     penaltyop = 1;
     value = getvalue();
@@ -603,6 +623,7 @@ static void ldy() {
     zerocalc(y);
     signcalc(y);
 }
+#endif
 
 static void lsr() {
     value = getvalue();
@@ -703,7 +724,8 @@ static void sbc() {
     overflowcalc(result, a, value);
     signcalc(result);
 
-    #ifndef NES_CPU
+    //#ifndef NES_CPU
+    #if ! (defined (NES_CPU) || defined (SPC_CPU))
     if (status & FLAG_DECIMAL) {
         clearcarry();
         
@@ -743,9 +765,11 @@ static void stx() {
     putvalue(x);
 }
 
+#ifndef SPC_CPU
 static void sty() {
     putvalue(y);
 }
+#endif
 
 static void tax() {
     x = a;
@@ -754,12 +778,14 @@ static void tax() {
     signcalc(x);
 }
 
+#ifndef SPC_CPU
 static void tay() {
     y = a;
    
     zerocalc(y);
     signcalc(y);
 }
+#endif
 
 static void tsx() {
     x = sp;
@@ -779,12 +805,14 @@ static void txs() {
     sp = x;
 }
 
+#ifndef SPC_CPU
 static void tya() {
     a = y;
    
     zerocalc(a);
     signcalc(a);
 }
+#endif
 
 //undocumented instructions
 #ifdef UNDOCUMENTED
@@ -846,6 +874,15 @@ static void tya() {
     #define rra nop
 #endif
 
+#ifdef SPC_CPU
+    #define cpy nop
+    #define dey nop
+    #define iny nop
+    #define ldy nop
+    #define sty nop
+    #define tay nop
+    #define tya nop
+#endif
 
 static void (*addrtable[256])() = {
 /*        |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |  A  |  B  |  C  |  D  |  E  |  F  |     */
