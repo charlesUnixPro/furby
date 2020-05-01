@@ -52,6 +52,64 @@ uint8_t port_ioa;
 uint8_t port_iob;
 uint8_t port_ioc;
 uint8_t port_iod;
+uint8_t bank_select;
+uint8_t wakeup_write;  // write
+uint8_t wakeup_read; // read
+uint8_t sleep;
+
+//
+// 00H   PORT DIRECTION CONTROL
+// 01H   PORT CONFIGURATION CONTROL
+// 02H   PORT A
+// 03H   PORT B
+// 04H   PORT C
+// 05H   PORT D
+// 06H   LATCH D
+// 07H   BANK SELECTION REGISTER
+// 08H   WAKEUP
+// 09H   SLEEP
+// 0AH   ?
+// 0BH   TIMER A CONTROL REGISTER
+// 0CH   ?
+// 0DH   INTERRUPTS
+// 0EH   ?
+// 0FH   ?
+// 10H   TIMER A LO
+// 11H   TIMER A HI
+// 12H   TIMER B LO
+// 13H   TIMER B HI
+// 14H   DAC 1
+// 15H   DAC 2
+// 16H   DAC CONTROL
+
+// 
+// furby source page 5, 6
+// PORT DIRECTION CONTROL REGISTER
+// Ports_dir EQU 00 ; (write only)
+// 4 I/O pins controled with each bit of this register
+// you can't control each pin separately, only as a nibble
+// 0 = input / 1 = output
+//
+//  7     6     5     4     3     2     1     0     Register bits
+//  D     D     C     C     B     B     A     A     Port
+//  7654  3210  7654  3210  7654  3210  7654  3210  Port bits
+
+// PORTS
+// SPC40A had 16 I/O pins
+// PORT_A  4 I/O pins 0-3
+// PORT_C  4 I/O pins 0-3
+// PORT_D  8 I/O pins 0-3
+
+// PORT CONFIGURATION CONTROL REGISTER
+// Ports_con EQU 01 ; write only
+// Same bit assignment as above.
+// Controls port buffering, not relevant to this code
+
+const char * port_nibble_strings [8] =
+  {
+    "A0123", "A4567", "B0123", "B4567",
+    "C0123", "C4567", "D0123", "D4567"
+  };
 
 #define ROM_BANK_0_START 0x0600
 #define ROM_BANK_0_SIZE  0x7A00  // 31232.
@@ -139,15 +197,19 @@ uint8_t ROM_BANK_2[ROM_BANK_2_SIZE];
 // MODE SELECT REGISTER  TMA only, select timer or counter
 // TIMER CLOCK SELECTOR  Select T or T/4
 
+
 void write6502(uint16_t address, uint8_t value)
   {
-    if (address <= 0x0006)
+    if (address <= 0x0016)
       {
         switch (address)
           {
             case 0x0000:
               printf ("I/O CONFIG $0000 set to $%02x\n", value);
               io_config_0 = value;
+              for (int i = 0; i < 8; i ++)
+                printf ("    %s %s\n", port_nibble_strings[0],
+                        (value & (1u << i)) ? "output" : "input");
               return;
 
             case 0x0001:
@@ -166,17 +228,36 @@ void write6502(uint16_t address, uint8_t value)
               return;
 
             case 0x0004:
-              goto write_error;
-
-            case 0x0005:
               printf ("I/O PORT IOC  $0005 set to $%02x\n", value);
               port_ioc = value;
               return;
 
-            case 0x0006:
+            case 0x0005:
+              printf ("I/O PORT IOD  $0005 set to $%02x\n", value);
               port_iod = value;
-              printf ("I/O PORT IOD  $0006 set to $%02x\n", value);
               return;
+
+            case 0x0006:
+              printf ("I/O LATCH D   $0006 read only\n");
+              goto write_error;
+
+            case 0x0007:
+              printf ("I/O BANK SELECTION   $0007 set to $%02x\n", value);
+              bank_select = value;
+              return;
+
+            case 0x0008:
+              printf ("I/O WAKEUP   $0008 set to $%02x\n", value);
+              wakeup_write = value;
+              return;
+
+            case 0x0009:
+              printf ("I/O SLEEP   $0009 set to $%02x\n", value);
+              sleep = value;
+              return;
+
+            default:
+              break;
           }
       }
 
@@ -198,12 +279,12 @@ uint8_t read6502(uint16_t address)
         switch (address)
           {
             case 0x0000:
-              printf ("I/O CONFIG $0000 read value of $%02x\n", io_config_0);
-              return io_config_0;
+              printf ("I/O CONFIG $0000 read; write_only\n");
+              goto read_error;
 
             case 0x0001:
-              printf ("I/O CONFIG $0001 read value of $%02x\n", io_config_1);
-              return io_config_1;
+              printf ("I/O CONFIG $0001 read; write_only\n");
+              goto read_error;
 
             case 0x0002:
               printf ("I/O PORT IOA  $0002 read value of $%02x\n", port_ioa);
@@ -214,15 +295,27 @@ uint8_t read6502(uint16_t address)
               return port_iob;
 
             case 0x0004:
-              goto read_error;
-
-            case 0x0005:
-              printf ("I/O PORT IOC  $0005 read value of $%02x\n", port_ioc);
+              printf ("I/O PORT IOC  $0004 read value of $%02x\n", port_ioc);
               return port_ioc;
 
-            case 0x0006:
-              printf ("I/O PORT IOD  $0006 read value of $%02x\n", port_iod);
+            case 0x0005:
+              printf ("I/O PORT IOD  $0005 read value of $%02x\n", port_iod);
               return port_iod;
+
+            case 0x0007:
+              printf ("I/O BANK SELECTION  $0006 read value of $%02x\n", bank_select);
+              return bank_select;
+
+            case 0x0008:
+              printf ("I/O WAKEUP  $0007 read value of $%02x\n", wakeup_read);
+              return wakeup_read;
+
+            case 0x0009:
+              printf ("I/O SLEEP $0009 read; write_only\n");
+              goto read_error;
+
+            default:
+              break;
           }
       }
 
