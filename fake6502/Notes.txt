@@ -1,0 +1,232 @@
+http://rubbermallet.org/fake6502.c
+
+SPC81A  two-channel speech/melody synthesiser
+
+"The first Furby model was based around a 6502-style Sunplus SPC81A microcontroller, which had 80 KiB of ROM and 128 bytes of RAM. Its core differed from the original 6502 in the lack of the Y index register. The TSP50C04 chip from Texas Instruments, implementing the LPC codec, was used for voice synthesis."
+
+wikipeida  SPC81A
+source     SPC40A   SPC120A SPC80A SPC256A  SPC512A
+
+[cac] I can find no online references to "SPC80A", so I am reading it ah "SPC81A".
+
+SUNPLUS docs
+
+https://www.manualslib.com/manual/1259150/Sunplus-Cpu6502.html?page=52#manual
+
+
+pg 3:
+
+Actual numeric value for TI pitch control
+
+bit 7 set = subtract value from current course value
+      clr = add value to current course value
+bit 6 set = select music pitch table
+      clr = select normal speech pith table
+bit 0-5 value to change course value (no change = 0)
+
+MAX POSITIVE IS 8F (+16 from normal voice of 00)
+MAX NEGATIVE IS 2F (-45 from normal voice of 00)
+
+8Fh is high pitched voice
+2Fh is low
+
+adding or subtracting clips, not wraps.
+
+
+pg 4:
+
+Motor speed pulse width
+Motor_on = power to motor, Motor_off is none.
+
+Mpulse_on = 16
+Mpulse_off = 16
+
+Cal_pos_fdw = 134 ; calibration switch forward direction
+Cal_pos_rev = 134 ; calibration switch forward direction
+
+PORTS
+SPC40A had 16 I/O pins
+PORT_A  4 I/O pins 0-3
+PORT_C  4 I/O pins 0-3
+PORT_D  8 I/O pins 0-3
+
+
+  RAM
+
+128 bytes of RAM from $80 - $FF
+
+  ROM
+
+BANK0 user ROM from $0600 - $7FFF
+BANK1 user ROM from $8000 - $FFF9
+
+  VECTORS
+
+NMI    $7FFA - $7FFB
+RESET  $7FFC - $7FFD
+IRQ    $7FFE - $7FFF
+
+page 6
+
+Port A (r/w) for TI & speech recgn
+
+bits 0-3  data nibble port
+
+Port B 
+b0,b1: I/O
+b4/b5: input only
+TI_init  EQU 1 ; B0 - TI reset control
+TI_CTS   EQU 2 ; B1 - hand shake to TI
+IR_IN    EQU 10H ; B4 I.R. Recv data
+TI_RTS   EQU 20H ; BR - TI wants data
+
+Port C
+Motor_cal   EQU 01H  ; C0 - lo when motor crosses switch
+Pos_sen     EQU 02H  ; C1 - motor ???ical sensor (intt C1)
+Touch_bck   EQU 04h  ; C2 - back touch
+Touch_front EQU 08H  ; C3 - front touch
+
+page 7
+
+Port D EQU 05h
+Ball_side    EQU 01H  ; D0 - hi when on any side (TILT)
+Ball_invert  EQU 02H  ; D1 - hi when inverted
+Light_in     EQU 04h  ; D2 - hi when bright light hits sensor
+Mic_in       EQU 08H  ; D3 - hi pulse microphone input
+Power_on     EQU 10H  ; D4 - power to rest of circuit
+Motor_led    EQU 20H  ; D5 - motor I.R. led driver
+Motor_lt     EQU 40h  ; D6 -  motor drive left (forward)
+Motor_rt     EQU 40h  ; D6 -  motor drive right (reverse)
+
+
+DATA LATCH PORT_D
+Latch_D EQU 06h
+
+BANK SELECTION REGISTER
+bank EQU 07H
+bit 0
+   0: bank 0
+   1: bank 1
+
+Wake_up  EQU 08H
+bit 0   wakeup on port D change
+   0 disable
+   1 enable
+read to see if wake-up or normal reset.
+only source for a wake-up
+Always reset stack on wakeup
+
+Sleep EQU 09H  ; write
+Writing 1 to bit 0 ????es sleep
+
+Timer A control register
+
+TMA_CON  EQU 0BH  ; write
+
+bit 7: timer one mode 0=timer, 1=counter
+bit 3: IE1 
+bit 2: T1
+bit 1: IE0 
+bit 0: T0
+
+    IEx  Tx
+      0   x    Counter clock external clock form IOC2
+      1   0    Counter clock CPUCLK / 8192
+      1   1    Counter clock CPUCLK / 65536
+
+page 8
+
+Interrupts EQU 0DH
+
+bit 7:  0 = watch dog on (poweron default); 1 = watch dog OFF
+    6:  0 = Timer A getnerate NMI; 1 = IRQ
+    5:  0 = Timer A interrupt off; 1 = on
+    4:  0 = Timer B interrupt off; 1 = on
+    3:  0 = CPU CLK/1024 interupt off; 1 = on
+    2:  0 = CPU CLK/8192 interupt off; 1 = on
+    1:  0 = CPU CLK/65536 interupt off; 1 = on
+    0:  0 = external interrupt off; 1 = on
+        rising edge, from port_c bit 1 (motor crosses switch?)
+
+Two 12 bit timers
+A can be timer or counter
+B is timer
+Timers count up; on overflow from FFF to 0, carry bit will
+create in interupt if the corresponding bit is set in INTERRUPRS register.
+The timer will be auto reloaded with the user startup value, and start
+countup again
+
+Counter will be reset by user loading 00 into register TMA_LSB and TMA_MSB
+Counter registers can be read on-the-fly; will not affect value or reset.
+
+TIMER A low byte
+TMA_LSB EQU 10h  read/write
+
+page 9
+
+TIMER A high byte
+TMA_MSB EQU 11H   read/write
+read:  x x x x 11 10 9 8  timer upper bits
+write: x x t c 11 10 9 8
+   t: 0 = speech mode 1 = tone mode
+   this the AUD pin to either the DAC or timer generated square wave
+
+   c:  0 = CPU clock, 1 = CPU clock / 4
+
+TIMER B low byte
+TMB_LSB EQU 12H
+
+TIMER B high bute
+TMB_MSB EQU 13H   read/write
+read:  x x x x 11 10 9 8  timer upper bits
+write: x x t c 11 10 9 8
+   t: 0 = speech mode 1 = tone mode
+   this the AUDB pin to either the DAC2 or timer generated square wave
+
+   c:  0 = CPU clock, 1 = CPU clock / 4
+
+D/A converters
+
+DAC_ctrl  EQU 16H
+Bit 7 0 = disable ADC, 1 = enable
+Bit 6-0 I/O
+
+page 10
+
+SystemClock 3579545   (6000000 commented out.)
+
+TimeA_low EQU <(4096-(SystemClock/5859)) 
+TimeA_hi EQU >(4096-(SystemClock/5859)) 
+
+TimeB_low EQU <(4096-(SystemClock/1465)) 
+TimeB_hi EQU >(4096-(SystemClock/1465)) 
+
+
+Port_def EQU A7h
+    D hi = out
+    D lo =in
+    C hi = out
+    C lo = in
+    B hi = in
+    B lo = out
+    A hi = out
+    A lo = in
+
+Con_def EQU 50H
+    D hi = out buffer
+    D lo = in pull low
+    C hi = out buffer
+    C lo = in pull hi
+    B hi = in hi-X
+    B lo = out buffer
+    A hi = out buffer
+    A lo = out buffer
+
+Intt_dflt EQU D0H 
+    interrupt reg 
+       no watchdog
+       irq
+       timer B
+       ext port C bit 1 = off
+
+page 11
