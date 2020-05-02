@@ -9,6 +9,8 @@ Say_active equ   14h
 Word_active equ   15h
 Clr_word_end equ fe16h
 Set_end equ fe17h
+Spch_more equ fe18h
+
 
 ;;; cac I am not sure how Furby 27 gets included. XXX
 
@@ -39,11 +41,7 @@ Set_end equ fe17h
 ;
 ; pg 105-108     TI sound chip communication
 ;
-
-
-
-; page 0 cover page complete
-
+;;; page 000 start complete; cover page 
 ;         TITLE PAGE
 ;
 ;       INTERACTIVE TOY
@@ -58,11 +56,8 @@ Set_end equ fe17h
 ; 135 South LaaSalle Street
 ; Chicago, Illinois  60603-4277
 ; Telephone (312) 372-7842
-
-
- 
-; page 1 complete
-
+;;; page 000 end
+;;; page 001 start complete
 ;*******************************************************************************
 ;
 ;	SPC81A Source Code   (Version 25)
@@ -110,11 +105,8 @@ Set_end equ fe17h
 ;    and ROOSTER LOVES YOU. Also add new names.
 ;
 ;*******************************************************************************
-
-
-
-; page 2 complete
-
+;;; page 001 end
+;;; page 002 start complete
 ; Release 3
 
 ;; File "testR3a"
@@ -126,12 +118,12 @@ Set_end equ fe17h
 ;    out before going to sleep.
 ;
 ; 5. When hungry is low enough to trigger sick counter, each sensor
-;    deducts two instead of one for each it.
+;    deducts two instead of one for each hit.
 ;
 ; 6. When diagnostics complete clear memory, reset hungry & sick to FF
-;    randomly choose new name and voice, then write EEPROM bfore
+;    randomly choose new name and voice, then write EEPROM before
 ;    going to sleep. Also extend EEPROM diagnostic to test all locations
-;    for pass/faul of device.
+;    for pass/fail of device.
 ;
 ; 7. Add new light routine
 
@@ -145,12 +137,12 @@ Set_end equ fe17h
 ;    until the front swtich is pressed again, and then does normal position
 ;    calibration stopping at the calibration switch.
 
-;11. On power up we still use tilt and inver to generate startup random
+;11. On power up we still use tilt and invert to generate startup random
 ;    numbers, but if feed switch is pressed for cold boot, we use it to
 ;    generate random numbers, because it is controlled by the user where
 ;    the tilt and invert are more flaky.
 
-;12. No matter what age, 25% if time he randomly pulls speech from age
+;12. No matter what age, 25% of time he randomly pulls speech from age
 ;    to generate more Furbish at older ages.
 
 ;13. Twinkle song egg
@@ -159,15 +151,14 @@ Set_end equ fe17h
 ;    the tilt switch.
 
 ;
-;*******************************************************************************
-;*******************************************************************************
-;*******************************************************************************
-;*******************************************************************************
-;*******************************************************************************
-;*******************************************************************************
-
-; page 3 complete
-
+;**************************************************************************
+;**************************************************************************
+;**************************************************************************
+;**************************************************************************
+;**************************************************************************
+;**************************************************************************
+;;; page 002 end
+;;; page 003 start complete
 ; Actual numeric value for TI pitch control
 
 ;  bit 7 set = subtract value from current course value
@@ -177,38 +168,40 @@ Set_end equ fe17h
 ;  bit 0-5 value to change course value (no change = 0)
 ;
 
-; A math routine in 'say_0' converts the calue for + or -
-; if <80 then subracts from 80 to get the minus version of 00
-; ie, if number is 70 then TI gets sent 19 (which is -10)
-; If number is 80 or > 80 ten get sned literal as positive.
+; A math routine in 'say_0' converts the value for + or -
+; if <80 then subtracts from 80 to get the minus version of 00
+; ie, if number is 70 then TI gets sent 10 (which is -10)
+; If number is 80 or > 80 then get sent literal as positive.
 
-; MOTE: MAX POSITIVE IS 8F (+16 from normal voice of 00)
+; NOTE: MAX POSITIVE IS 8F (+16 from normal voice of 00)
 ;       MAX NEGATIVE is 2F (-47 from normal voice of 00)
 
-;This is a difference of 80h - 2Fh or 41h
+;This is a difference of 80h - 2Fh or 51h
 
-; 8Fh is hi voice  (8f is very squeeeeeeeke)
-; 2Fh lo voice ( very log)
+
+; 8Fh is hi voice  (8f is very squeeeeeke)
+; 2Fh lo voice ( very low)
+
 
 ; The math routine in 'Say_0' allows a +-decimal number in the speech table.
 ; A value of 80 = no change or 00 sent to TI
 ; 81 = +1
 ; 8f = +16
 ;
-; A value of 8F = 01 from normal voice
+; A value of 7F = -1 from normal voice
 ; 70 = -16
 
 ; The voice selection should take into consideration that the hi voice
 ; selection plus an aditional offset is never greater than 8f
-; Or a low coive minus offset never less then 2f.
+; Or a low voice minus offset never less than 2f.
 
 Voice1		EQU	83h	;(+3) high voice
-Voice2		EQU	7Ah	;(-6) mid vouce
-Voice3		EQU	71H	;(-15) low voice
+Voice2		EQU	7Ah	;(-6) mid voice
+Voice3		EQU	71h	;(-15) low voice
 
 
-;;;; we converted to a random sleection table, but since all voice tables
-;    use the equates plus some offset, we ???? the change in the SAY_0
+;;;; we converted to a random selection table, but since all voice tables
+;    use the equates plus some offset, we read the change in the SAY_0
 ;    routine. We always assign voice 3 which is the lowest, and based on
 ;    the random power up pitch selection, the ram location 'Rvoice' holds
 ;    the number to add to the voice+offset received from the macro table.
@@ -216,20 +209,18 @@ Voice3		EQU	71H	;(-15) low voice
 
 Voice	EQU	Voice3		;pitch (choose Voice1, Voice2, VOice3) (voice2=norm)
 
-; Select VOice3 since it is the lowest and then add the difference to get
-; Voice2 ot Voice3. Here we assign that difference to an equte to be
+; Select Voice3 since it is the lowest and then add the difference to get
+; Voice2 or Voice3. Here we assign that difference to an equate to be
 ; used in the voice table that is randomly selected on power up.
 
 S_voice1	EQU	18	;Voice3 + 10d = Voice1
 S_voice2	EQU	09	;Voice3 + 09d = Voice2
+;;; page 003 end
+;;; page 004 start complete
+S_voice3	EQU	0	;Voice3 + 00d = Voice3
 
 
-; page 4 complete
-
-S_voice3	EQU	0	;Voice3 + 00d in Voice3
-
-
-;*******************************************************************************
+;********************************************************************
 
 ; Motor speed pulse width :
 ; Motor_on = power to motor, Motor_off is none.
@@ -241,78 +232,76 @@ Mpulse_off	EQU	16	;
 Cal_pos_fwd	EQU	134	;calibration switch forward direction
 Cal_pos_rev	EQU	134	;calibration switch forward direction
 
-;*******************************************************************************
-;*******************************************************************************
-;*******************************************************************************
-;*******************************************************************************
-;*******************************************************************************
-
-;+---------------------------------------------------------+
-;|                             PORTS                       |
-;| SPC40A has : 16 I/O pins                                |
-;| PORT_A 4 I/O pins  0-3                                  |
-;| PORT_C 4 I/O pins  0-3                                  |
-;| PORT_D 4 I/O pins  0-7                                  |
-;|                                                         |
-;|                              RAM                        |
-;|                                                         |
-;| SPC40A has : 128 bytes of RAM                           |
-;| from $80 - $FF                                          |
-;|                                                         |
-;|                              ROM                        |
-;| SPC40A has :                                            |
-;| BANK0 user ROM from $0600 - $7FFF                       |
-;| BANK1 user ROM from $8000 - $FFF9                       |
-;|                                                         |
-;|                                                         |
-;|                              VECTORS                    |
-;| NMI   vector  $7FFA / $7FFB                             |
-;| RESET vector  $7FFC / $7FFD                             |
-;| IRQ   vector  $7FFE / $7FFF                             |
-;+---------------------------------------------------------+
-;+---------------------------------------------------------+
-;|                             PORTS                       |
-;| SPC120A has : 17 I/O pins                               |
-;| PORT_A 4 I/O pins  0-3                                  |
-;| PORT_B 4 I/O pins  0,1,2,4,5                            |
-;| PORT_C 4 I/O pins  0-3 input only                       |
-;| PORT_D 4 I/O pins  0-7                                  |
-;|                                                         |
-;|                              RAM                        |
-;|                                                         |
-;| SPC120A has : 128 bytes of RAM                          |
-;| from $80 - $FF                                          |
-;|                                                         |
-;|                              ROM                        |
-;| SPC120A has :                                           |
-
-; page 5 complete
-
-;| BANK0 user ROM from $0600 - $7FFF                       |
-;| BANK1 user ROM from $8000 - $FFFF                       |
-;| BANK2 user ROM from $10000 - $17FFF                     |
-;| BANK3 user ROM from $1A000 - $1FFFF                     |
-;|                                                         |
-;|                                                         |
-;|                              VECTORS                    |
-;| NMI   vector  $7FFA / $7FFB                             |
-;| RESET vector  $7FFC / $7FFD                             |
-;| IRQ   vector  $7FFE / $7FFF                             |
-;+---------------------------------------------------------+
+;********************************************************************
+;********************************************************************
+;********************************************************************
+;********************************************************************
+;********************************************************************
+;
+;+------------------------------------------------------------------+
+;|                       PORTS                                      |
+;| SPC40A has : 16 I/O pins                                         |
+;| PORT_A 4 I/O pins  0-3                                           |
+;| PORT_C 4 I/O pins  0-3                                           |
+;| PORT_D 8 I/O pins  0-7                                           |
+;|                                                                  |
+;|                         RAM                                      |
+;|                                                                  |
+;| SPC40A has : 128 bytes of RAM                                    |
+;| from $80 - $FF                                                   |
+;|                                                                  |
+;|                         ROM                                      |
+;| SPC40A has :                                                     |
+;| BANK0 user ROM from $0600 - $7FFF                                |
+;| BANK1 user ROM from $8000 - $FFF9                                |
+;|                                                                  |
+;|                                                                  |
+;|                        VECTORS                                   |
+;| NMI   vector  $7FFA / $7FFB                                      |
+;| RESET vector  $7FFC / $7FFD                                      |
+;| IRQ   vector  $7FFE / $7FFF                                      |
+;+------------------------------------------------------------------+
+;+------------------------------------------------------------------+
+;|                             PORTS                                |
+;| SPC120A has : 17 I/O pins                                        |
+;| PORT_A 4 I/O pins  0-3                                           |
+;| PORT_B 4 I/O pins  0,1,2,4,5                                     |
+;| PORT_C 4 I/O pins  0-3 input only                                |
+;| PORT_D 8 I/O pins  0-7                                           |
+;|                                                                  |
+;|                              RAM                                 |
+;| SPC120A has : 128 bytes of RAM                                   |
+;| from $80 - $FF                                                   |
+;|                                                                  |
+;|                              ROM                                 |
+;| SPC120A has :                                                    |
+;;; page 004 end
+;;; page 005 start complete
+;| BANK0 user ROM from $0600 - $7FFA                                |
+;| BANK1 user ROM from $8000 - $FFFF                                |
+;| BANK2 user ROM from $10000 - $17FFF                              |
+;| BANK3 user ROM from $1A000 - $1FFFF                              |
+;|                                                                  |
+;|                                                                  |
+;|                              VECTORS                             |
+;| NMI   vector  $7FFA / $7FFB                                      |
+;| RESET vector  $7FFC / $7FFD                                      |
+;| IRQ   vector  $7FFE / $7FFF                                      |
+;+------------------------------------------------------------------+
 
 
 ; unusable areas in rom
 
-;SPC40A:   8000H ??  DEFFH should be skipped (Dummy area)
+;SPC40A:   8000H --  DEFFH should be skiped (Dummy area)
 ;  bank 0 = 600-7FFA
 ;  bank 1 = 8000 - DFFF reserved , start @ E000 - FFFA
 
-;SPC80A:   10000H ??  13FFFH should be skipped (Dummy area)
-;  bank 0 = 600-7FFA
+;SPC80A:   10000H --  13FFFH should be skiped (Dummy area)
+;  bank 0 = 600 - 7FFA
 ;  bank 1 = 8000 - FFFA
 ;  bank 2 = 10000-13FFF reserved , start at 14000 - 17FFF
 
-;SPC120A: ;SCP120A  18000H ??  139FFH should be skipped (Dummy area)
+;SPC120A: ;SCP120A  18000H --  19FFFH should be skiped (Dummy area)
 ;  bank 0 = 600-7FFA
 ;  bank 1 = 8000 - FFFA
 ;  bank 2 = 10000-17FFF
@@ -322,7 +311,7 @@ Cal_pos_rev	EQU	134	;calibration switch forward direction
 
 ;SPC512A:  ;SPC512A: Non dummy area
 
-;*******************************************************************************
+;*************************************************************************************
 
 .CODE
 .SYNTAX 6502
@@ -331,10 +320,10 @@ Cal_pos_rev	EQU	134	;calibration switch forward direction
 
 
 ;----------------- PORT DIRECTION CONTROL REGISTER -----------------------------
-Ports_dir	equ	00
+Ports_dir	EQU	00	; (write only)
 ;
 ; (4 I/O pins) controlled with each bit of this register
-; you can't control each pin seperately, only as a nubble
+; you can't control each pin separately, only as a nibble
 ; 0 = input / 1 = output
 ;
 ; 7      6      5      4      3      2      1     0      (REGISTER BITS)
@@ -343,22 +332,22 @@ Ports_dir	equ	00
 ;-------------------------------------------------------------------------------
 
 ;----------------- PORT CONFIGURATION CONTROL REGISTER -------------------------
-
-; page 6 complete
+;;; page 005 end
+;;; page 006 start complete
 
 ;             based on of the port pin is input or output
-Ports_con	equ	01	; (write only)
+Ports_con	EQU	01	; (write only)
 ;
 ; (4 I/O pins) controlled with each bit of this register
 ; 7      6      5      4      3      2      1     0      (REGISTER BITS)
 ; D      D      C      C      B      B      A     A      (PORT)
-; 7654   4310   7654   3210   7654   3210   7654  3210   (PORT BITS)
+; 7654   3210   7654   3210   7654   3210   7654  3210   (PORT BITS)
 
 ; port_a INPUTS can be either:
 ; 0 = float  1 = pulled high
 
 ; port_a OUTPUTS can be either:
-; 0 = buffer 1 = upper (4) bits Open drain Pmos (souce)
+; 0 = buffer 1 = upper (4) bits Open drain Pmos (source)
 ;                lower (4) bits Open drain Nmos (sink)
 
 ; port_b INPUTS can be either:
@@ -383,16 +372,16 @@ Ports_con	equ	01	; (write only)
 
 ;----------------- I/O PORTS ---------------------------------------------------
 
-Port_A		equ	92H 	; (read/write) for TI & speech recgn CPU's
-Data_D0		equ	01h	; bit 0 data nible port
-Data_D1		equ	02h	;
-Data_D2		equ	04h	;
-Data_D3		equ	08h	;
+Port_A		EQU	02H 	; (read/write) for TI & speech recgn CPU's
+Data_D0		EQU	01H	; bit 0 data nible port
+Data_D1		EQU	02H	;
+Data_D2		EQU	04H	;
+Data_D3		EQU	08H	;
 
-Port_B		equ	03h	;b0/b1 = I/O b4/br = inp only
-TI_init		equ	01h	;B0 - TI reset control
-TI_CTS		EQU	02H	;B1 = hand shake to TI
-IR_IN		EQU	10H	;B4 I.R. Recv data
+Port_B		EQU	03H	;b0/b1 = I/O b4/b5 = inp only
+TI_init		EQU	01H	;B0 - TI reset control
+TI_CTS		EQU	02H	;B1 - hand shake to TI
+IR_IN		EQU	10H	;B4 - I.R. Recv data
 TI_RTS		EQU	20H	;B5 - TI wants data
 
 Port_C		EQU	04H	;(read/write)
@@ -400,30 +389,29 @@ Motor_cal	EQU	01H	;C0 - lo when motor crosses switch
 Pos_sen		EQU	02H	;C1 - motor ????ical sensor (intt C1)
 Touch_back	EQU	04H	;C2 - back touch
 Touch_frnt	EQU	08H	;C3 - front touch
-
-; page 7 complete
-
+;;; page 006 end
+;;; page 007 start complete
 Port_D		EQU	05H	;(read/write)
 Ball_side	EQU	01H	;D0 - hi when on any side (TILT)
 Ball_invert	EQU	02H	;D1 - hi when inverted
 Light_in	EQU	04H	;D2 - hi when bright light hits sensor
-Mic_in		EQU	05H	;D3 - hi pulse microphone input
+Mic_in		EQU	08H	;D3 - hi pulse microphone input
 Power_on	EQU	10H	;D4 - power to rest of circuit
 Motor_led	EQU	20H	;D5 - motor I.R. led driver
 Motor_lt	EQU	40H	;D6 - motor drive left (forward)
-Motor_rt	EQU	60H	;D7 - motor drive right (reverse)
+Motor_rt	EQU	80H	;D7 - motor drive right (reverse)
 
 ;-------------------------------------------------------------------------------
 
 ;----------------- DATA LATCH PORT_D -------------------------------------------
 
 Latch_D		EQU	06H	; (read)
-; read to lath data from port_d. used for wake-up on pin change
+; read to latch data from port_d, used for wake-up on pin change
 
 ;-------------------------------------------------------------------------------
 
 ;----------------- BANK SELECTION REGISTER -------------------------------------
-Bank		EQU	07H	; (read/write0 x x x x x x x b
+Bank		EQU	07H	; (read/write) x x x x x x x b
 ; 0 = bank 0, 1 = bank 1	;              7 6 5 4 3 2 1 0
 ; only two banks in SPC40a
 ;-------------------------------------------------------------------------------
@@ -432,17 +420,18 @@ Bank		EQU	07H	; (read/write0 x x x x x x x b
 Wake_up		EQU	08H	; (read/write) x x x x x x x w
 ;                                              7 6 5 4 3 2 1 0
 
-; w=(0=disable, 1=enable on port_d change)
+; w=(0=disable, 1=enable wake-upon port_d change)
 ; read to see if wake-up, or normal reset
-; this is the only source for a wake up.
+; this is the only source for a wake-up
+; Always reset stack on wake up.
 ;-------------------------------------------------------------------------------
 
 
 ;----------------- SLEEP -------------------------------------------------------
-Sleep		EQU	09H	; (read/wrote) x x x x x x x s
+Sleep		EQU	09H	; (write)      x x x x x x x s
 ;				;              7 6 5 4 3 2 1 0
-; s =(0=don't case, 1=s)
-; writting 1 to bit0, f????as sleep
+; s =(0=don't care, 1=sleep)
+; writting 1 to bit0, forces sleep
 ;-------------------------------------------------------------------------------
 
 ;----------------- TIMER A CONTROL REGISTER ------------------------------------
@@ -454,27 +443,26 @@ TMA_CON		EQU	0BH	; (write)
 ;            m x x x
 ;
 ;            m= Timer one mode (0=Timer,1=Counter)
-
-; page 8 complete
-
-;            bit3: IE1 | IE1=0: Counter clocks external clock from IOC2
-;            bit2: T1  |    =1, T1= 0: counter clock= CPUCLK/8192
-;            bit1: IE0 |        T1= 1: counter clock= CPUCLK/65536
-;            bit0: T0  | IE0=0: Counter clocks external clock from IOC2
-;                           =1, T0= 0: counter clock= CPUCLK/8192
-;                               T0= 1: counter clock= CPUCLK/65536
+;;; page 007 end
+;;; page 008 start complete
+;            Bit3: IE1 | IE1= 0: Counter clock= external clock from IOC2
+;            Bit2: T1  |    = 1, T1= 0: counter clock= CPUCLK/8192
+;            Bit1: IE0 |         T1= 1: counter clock= CPUCLK/65536
+;            Bit0: T0  | IE0= 0: Counter clocks external clock from IOC2
+;                           = 1, T0= 0: counter clock= CPUCLK/4
+;                                T0= 1: counter clock= CPUCLK/64
 ;
 ;-------------------------------------------------------------------------------
 
 
 ;----------------- INTERRUPTS --------------------------------------------------
-Interrupts	EQU	0DH
+Interrupts	EQU	0DH	; (read/write)
 ;
 ;        7 6 5 4 3 2 1 0
 ;        w m a b 3 2 1 e
 ;
 ;        w = (0=watch dog ON, power-on default) (1=watch dog OFF)
-;        m = (0=Timer A generates NMI INT, 1=Tamer A generates IRQ INT)
+;        m = (0=Timer A generates NMI INT, 1=Timer A generates IRQ INT)
 ;        a = (0=Timer A interrupt off, 1=Timer A interrupt on)
 ;        b = (0=Timer B interrupt off, 1=Timer B interrupt on)
 ;        3 = (0=CPU CLK/1024 interrupt off,  1=CPU CLK/1024 interrupt on)
@@ -486,14 +474,15 @@ Interrupts	EQU	0DH
 
 ;----------------- TIMERS ------------------------------------------------------
 ; There are two 12bits timers.
-; Timer A can be either a timer or a counter (as set by TIMER_CON)
-; Timer B can only be used as a timer
+; Timer A can be either a timer or a counter. (as set by TIMER_CON)
+; Timer B can only be used as a timer.
 ;
-; Timers count-up and on overfrom from 0FFF to 0000 this carry bit will register.
-; The time will be auto reload iwth the user setup value, and
+; Timers count-up and on overflow from 0FFF to 0000, this carry bit will
+; create an interrupt if the corresponding bit is set in INTERRUPTS register.
+; The timer will be auto reloaded with the user setup value, and start,,,
 ; count-up again.
 ;
-; Counter will reset by user loading *00 inter reister TMA_LSV and TMA_MSB.
+; Counter will reset by user loading #00 into register TMA_LSB and TMA_MSB.
 ; Counter registers can be read on-the-fly, this will not affect register,,,
 ; values, or reset them.
 ;
@@ -504,9 +493,8 @@ Interrupts	EQU	0DH
 TMA_LSB		EQU	10H	; (read/write)
 ;
 ; all 8bits valid (lower 8bits of 12bit timer)
-
-; page 9 complete
-
+;;; page 008 end
+;;; page 009 start complete
 ;-------------------------------------------------------------------------------
 
 ;----------------- TIMER A (high byte) -----------------------------------------
@@ -516,10 +504,10 @@ TMA_MSB		EQU	11H	; (read/write)
 ;
 ; write       x  x  t  c  11 10 9  8    timer upper 4 bits
 ;             7  6  5  4  3  2  1  0    register bit
-
-;             r=(0=speech mode, 1=Tone mode)
-;             this connect the AUDA pin to either
-;             the DAC, or Timer generated square wave
+;
+;             t=(0=speech mode, 1=Tone mode)
+;             this connects the AUDA pin to either
+;             the DAC1, or Timer generated square wave
 ;
 ;             c=(0=CPU clock,  1=CPU clock/4)
 ;-------------------------------------------------------------------------------
@@ -527,7 +515,7 @@ TMA_MSB		EQU	11H	; (read/write)
 ;----------------- TIMER B (low byte) ------------------------------------------
 TMB_LSB		EQU	12H
 ;
-; all 8 bit valid (lower 8 bits of 12 bit timer)
+; all 8 bits valid (lower 8 bits of 12bit timer)
 ;-------------------------------------------------------------------------------
 
 ;----------------- TIMER B (high byte) -----------------------------------------
@@ -538,8 +526,8 @@ TMB_MSB		EQU	13H
 ; write       x  x  t  c  11 10 9  8    timer upper 4 bits
 ;             7  6  5  4  3  2  1  0    register bit
 
-;             r=(0=speech mode, 1=Tone mode)
-;             this connect the AUDB pin to either
+;             t=(0=speech mode, 1=Tone mode)
+;             this connects the AUDB pin to either
 ;             the DAC2, or Timer generated square wave
 ;
 ;             c=(0=CPU clock,  1=CPU clock/4)
@@ -553,15 +541,14 @@ DAC2		EQU	15H	; (write)
 
 ;----------------- D/A CONVERTERS ----------------------------------------------
 ; this needs more work to understand DMH
-;    16H    ADVoutputPort16H:
+;    16H    ADCoutputPort16H:
 
 DAC_ctrl	EQU	16H
 
 
 ;
-
-; page 10 complete
-
+;;; page 009 end
+;;; page 010 start complete
 ;               Bit7: 0: Diable ADC; 1: Enable ADC
 ;               Bit6: I/O
 ;               Bit5: I/O
@@ -608,7 +595,7 @@ Port_def	EQU	A7H	;D hi-out,D lo=in  / C hi=out,C lo=inp
 Con_def		EQU	50H	;D hi=out buffer, D lo=in pull lo
 ;				;C hi=out buffer, C lo=in pull hi
 ;				;B hi=in hi-Z   , B lo=out buffer
-;				;A hi=out buffer, B lo=out buffer
+;				;A hi=out buffer, A lo=out buffer
 
 Intt_dflt	EQU	D0H	;sets interrupt reg = no watchdoc, irq
 				; timer B  and Ext port C bit 1 = off
@@ -616,9 +603,8 @@ Intt_dflt	EQU	D0H	;sets interrupt reg = no watchdoc, irq
 ;**** run EQUs
 
 ;*******************************************************************************
-
-; page 11 complete
-
+;;; page 010 end
+;;; page 011 start complete
 ; Send a breaking pulse ot stop motor drift, and this EQU is a decimal number
 ; that determines how many time through the 2.9 mSec loop (how many loops)
 ; the brake pulse is on. If attempting to make single count jumps, the
@@ -675,9 +661,8 @@ Ran_invert	EQU	5
 
 Seq_sound	EQU	0
 Ran_sound	EQU	16
-
-; page 12 complete
-
+;;; page 011 end
+;;; page 012 start complete
 Seq_light	EQU	0
 Ran_light	EQU	16
 
@@ -696,12 +681,14 @@ Ran_hunger	EQU	11
 Seq_sick	EQU	4
 Ran_sick	EQU	12
 
-; rev  fub11ja
 
-; Each sensor also determines how oftern it is random or sequential
+
+; rev  furb11ja
+
+; Each sensor also determines how often it is random or sequential
 ; as in 50/50 or 60/40 etc.
-; These entries ars subtracted from the random number generated
-; and determine the split. (the larger hers, the more likely sequential pick)
+; These entries are subtracted from the random number generated
+; and determine the split. (the larger here, the more likely sequential pick)
 
 Tilt_split	EQU	80h	;
 Invert_split	EQU	80h	;
@@ -714,16 +701,16 @@ Bored_split	EQU	80h	;
 Hunger_split	EQU	80h	;
 Sick_split	EQU	80h	;
 
-;*******************************************************************************
+;***************************************************************************
 
 Random_age	EQU	30h	;at any age, below this number when a
 ;				random number is picked will cause him
 ;				to pull from the age 1 table. More Furbish.
 
-;*******************************************************************************
+;****************************************************************************
 
 Learn_chg	EQU	31	;amount to inc or dec training of words
-;----------------------------------------
+;------------------------------------
 Food		EQU	20h	;amount to increase 'Hungry' for each feeding
 Need_food	EQU	80h	;below this starts complaining about hunger
 Sick_reff	EQU	60h	;below this starts complaining about sickness
@@ -732,12 +719,11 @@ Max_sick	EQU	80h	;cant go below this when really sick
 
 Hungry_dec	EQU	01	;subtract X amount for each sensor trigger
 Sick_dec	EQU	01	;subtract X amount for each sensor trigger
-;----------------------------------------
+;------------------------------------
 Nt_word		EQU	FEH	;turn speech word active off
 Nt_last		EQU	FBH	;bit 2 off - last word sent to TI
-
-; page 13 complete
-
+;;; page 012 end
+;;; page 013 start complete
 Nt_term		EQU	F7h	;bit 3 off -terminator to speech TI
 Clr_spch	EQU	FCH	;clears spch_activ & word_activ
 CTS_lo		EQU	FDH	;makes TI_CTS go lo
@@ -798,9 +784,8 @@ Nt_do_feed	EQU	DFh	;clears sensor change req
 Nt_do_tilt	EQU	BFh	;clears sensor change req
 Nt_do_invert	EQU	7Fh	;clears sensor change req
 Nt_do_lt_brt	EQU	FDh	;clears sensor change req
-
-; page 14 complete
-
+;;; page 013 end
+;;; page 014 start complete
 Nt_do_lt_dim	EQU	FBh	;clears sensor change req
 ;--------
 Nt_temp_gam1	EQU	FEh	;clears game mode bits
@@ -850,7 +835,7 @@ Motor_lo	EQU	94h	;
 Motptr_lo	EQU	95h	;table ponter to get motor position
 Motptr_hi	EQU	96h	;
 Which_delay	EQU	97h	;how much time between motor calls
-ntt_Temp	EQU	98h	;
+Intt_Temp	EQU	98h	;
 Drift_fwd	EQU	99h	;time motor reverses to stop drift
 Drift_rev	EQU	9Ah	;
 Pot_timeL	EQU	9Bh	;motor uses to compare against current position
@@ -862,10 +847,8 @@ Moff_len	EQU	9Ch	;holds motor power off pulse time
 Mon_len		EQU	9Dh	;holds motor power on pulse time
 Motor_pulse1	EQU	9Eh	;motor pulse timer
 Slot_vote	EQU	9Fh	;need majority cnt to declaare a valid slot
-
-
-; page 15 complete ; more low ram A0-C7
-
+;;; page 014 end
+;;; page 015 start complete; more low ram A0-C7
 Motor_led_timer	EQU	A0h	;how long after motion done led on for IR
 Mot_speen_cnt	EQU	A1h	;motor speed test
 Mot_opto_cnt	EQU	A2h	; "
@@ -924,11 +907,8 @@ Req_macro_hi	EQU	C5h	;
 
 Sickr_count	EQU	C6h	;sequential counter for sick speech table
 Hungr_count	EQU	C7h	;sequential counter for hunger speech table
-
-
-
-; page 16 complete ; more low ram C8-CD
-
+;;; page 015 end
+;;; page 016 start complete; more low ram C8-CD
 Motor_pulse2	EQU	C8h	;motor pulse timer
 
 ;***** DO NOT CHANGE BIT ORDER *****
@@ -979,10 +959,8 @@ Do_lght_brt	EQU	02H	;bit 1 = set when light > prev reff level
 Do_lght_dim	EQU	04H	;bit 2 = set when light < prev reff level
 Do_tummy		EQU	08H	;bit 3 = set when front touch triggered
 Do_back		EQU	10H	;bit 4 = set when back touch triggered
-
-
-; page 17 complete ; more low ram CE-D9
-
+;;; page 016 end
+;;; page 017 start complete; more low ram CE-D9
 Do_feed		EQU	20H	;bit 5 = set when feed sensor triggered
 Do_tilt		EQU	40H	;bit 6 = set when tilt sensor triggered
 Do_invert		EQU	80H	;bit 7 = set when inverted sensor triggered
@@ -1041,11 +1019,8 @@ Seed_1		EQU	D8h	;only seed 1 & seed 2 are saved
 Seed_2		EQU	D9h	; "    "    "
 
 ; There are used for training each sensor. There is a word number which
-
-
-
-; page 18 complete ; more low ram DA-F0h; stack EA-FF
-
+;;; page 017 end
+;;; page 018 start complete; more low ram DA-F0h; stack EA-FF
 ; is 1-16 for the sesnor table macro list and a ram for count which
 ; determines how often to call the learned word.
 
@@ -1102,12 +1077,8 @@ Spc1_seed2	EQU	EFh	;
 Deep_sleep	EQU	F0h	;0-no deep sleep 11h is. (tilt wont wakeup)
 
 ;*************** Need to allow stack growth down (EAh- FFH ) ******************
-
-
-
-
-; page 19 complete
-
+;;; page 018 end
+;;; page 019 start complete
 Stacktop	EQU	FFH	;Stack Top
 
 
@@ -1156,9 +1127,8 @@ RAMClear:
 	CPX	#7FH		; check for end
 	BNE	RAMClear	; branch, not finished
 				; fill done
-
-; page 20 complete
-
+;;; page 019 end
+;;; page 020 start complete
 Main:
 
 InitIO:
@@ -1216,9 +1186,8 @@ InitIO:
 	STA	Mili_sec	;also preset IRQ timer
 
 	CLI			;Enable IRQ
-
-; page 21 complete
-
+;;; page 020 end
+;;; page 021 start complete
 	JSR	Kick_IRQ		;wait for interrupt to restart
 
 	JSR	TI_reset		;go init TI (uses 'Cycle_timer')
@@ -1272,9 +1241,8 @@ Half_d3:
 	DEC	TEMP1		;
 	BNE	Half_d2		;loop
 	RTS			; done
-
-; page 22 complete
-
+;;; page 021 end
+;;; page 022 start complete
 Test_byp:		;We assume diagnostic only run on coldboot
 
 
@@ -1332,9 +1300,8 @@ Do_cold_boot:
 
 	LDA	#00
 	STA	Warm_cold		;flag cold boot
-
-; page 23 complete
-
+;;; page 022 end
+;;; page 023 start complete
 	LDA	Stat_0		;system
 	ORA	#Say_new_name	;make system say new name
 	STA	Stat_0		;
@@ -1387,12 +1354,8 @@ Warm_boot:	;normal stat when Port_D wakes us up.
 ; when the sleep routine executes, (00 01 based on this but)
 ; When we wake up we recover this bit and it becomes the previous done
 ; flag back in 'Stat_0', so that if the osc is
-
-
-
-
-; page 24 complete
-
+;;; page 023 end
+;;; page 024 start complete
 ; still dark or failed, Furby wont go back to sleep.
 
 	LDA	Seed_2		;from EEPROM
@@ -1449,9 +1412,8 @@ No_prevsleep:
 	LDA	Warm_cold		;decide if warm or cold boot
 	CMP	#11h		;ck for warm boot
 	BEQ	No_zero		;jump if is
-
-; page 25 complete
-
+;;; page 024 end
+;;; page 025 start complete
 	LDA	#00		;point to macro 9 (SENDS TO SLEEP POSITION)
 	STA	Macro_Lo
 	STA	Macro_Hi
@@ -1508,9 +1470,8 @@ No_zero:
 	JMP	Start_macro	;go start search
 
 ;*******************************************************************************
-
-; page 26 complete
-
+;;; page 025 end
+;;; page 026 start complete
 ;-------------------------------------------------------------------------------
 ;| IDLE Routine
 ;-------------------------------------------------------------------------------
@@ -1568,11 +1529,8 @@ Spc1_Name2:
 	INX			;to hi byte
 	LDA	Ck_Name_table,X	;ok hi byte
 	CMP	Req_macro_hi	;ck against last speech request
-
-
-
-; page 27 complete
-
+;;; page 026 end
+;;; page 027 start complete
 	BNE	Not_Name3		;jump if not
 	JMP	Say_Sname		;speak it
 Not_Name2:
@@ -1632,9 +1590,8 @@ Not_IRxmit3:
 	JMP	Spc1_IR2		;loop to done
 Spc1_IR_dn:
 ;
-
-; page 28 complete
-
+;;; page 027 end
+;;; page 028 start complete
 ;
 Spc1_macro1:
 	LDX	#00		;offset
@@ -1690,10 +1647,8 @@ Sleepy_table:
 	DW	167	;wake up
 	DW	168	;wake up
 	DW	169	;wake up
-
-
-; page 29 complete
-
+;;; page 028 end
+;;; page 029 start complete
 	DW	258	;Back sw
 	DW	259	;Back sw
 	DW	260	;Back sw
@@ -1756,9 +1711,8 @@ IRxmit_table:
 	DW	339	;trigger macro
 	DB	00	;which IR command to call (0 - 0f)
 	DW	60	;trigger macro
-
-; page 30 complete
-
+;;; page 029 end
+;;; page 030 start complete
 	DB	03	;which IR command to call (0 - 0f)
 	DW	344	;trigger macro
 	DB	03	;which IR command to call (0 - 0f)
@@ -1817,9 +1771,8 @@ IRxmit_table:
 	DW	261	;trigger macro
 	DB	09	;which IR command to call (0 - 0f)
 	DW	262	;trigger macro
-
-; page 31 complete
-
+;;; page 030 end
+;;; page 031 start complete
 	DB	09	;which IR command to call (0 - 0f)
 	DW	396	;trigger macro
 	DB	09	;which IR command to call (0 - 0f)
@@ -1882,9 +1835,8 @@ IRxmit_table:
 	DW	257	;trigger macro
 	DB	15	;which IR command to call (0 - 0f)
 	DW	420	;trigger macro
-
-; page 32 complete
-
+;;; page 031 end
+;;; page 032 start complete
 	DB	15	;which IR command to call (0 - 0f)
 
 ;mod F-rels2 ; send sleep if recv sleep on IR
@@ -1943,9 +1895,8 @@ Nosayname:
 ;
 ; ***** below routines run at 742 mSec loops
 ; TImer B sets 'Milisec_flag each 742 miliseconds
-
-; page 33 complete
-
+;;; page 032 end
+;;; page 033 start complete
 Updt_timer:
 	LDA	Milisec_flag	;if >0 then 742 mili seconds have passed
 	BEQ	TimerL_dn	;bypass if 0
@@ -2004,9 +1955,8 @@ Ck_task_egg:
 	LDA	Game_1		;get game active bits
 	ROR	A		;move bit 0 to carry
 	BCC	Ck_g2		;check next if not activ
-
-; page 34 complete
-
+;;; page 033 end
+;;; page 034 start complete
 	JMP	Game_fortune	;jump if active
 Ck_g2:
 	ROR	A		;bit 1
@@ -2064,12 +2014,8 @@ Ck_g9:
 ; 10 = Back switch
 ; 20 = Feed switch
 ; 40 = TIlt switch
-
-
-
-; page 35 complete
-
-
+;;; page 034 end
+;;; page 035 start complete
 ; 8- Invert switch
 
 ; We assign a sibgle bit per game or egg scenario. Each time a
@@ -2125,10 +2071,8 @@ Ck_anysens:
 	LDA	Stat_4		;ck if any sensor is triggered
 	BNE	Ck_gam1		;go ck games if any set
 	JMP	Ck_bored		;bypass if none
-
-
-; page 36 complete
-
+;;; page 035 end
+;;; page 036 start complete
 ;
 Ck_gam1:	;fortune teller
 	LDX	Egg_cnt		;get current count
@@ -2189,9 +2133,8 @@ Ck_gam3a:
 	CMP	#FFh		;test if end of table and start of game
 	BNE	Ck_gam4		;jump if not at end
 	JSR	Clear_games	;go reset all other triggers and game pointers
-
-; page 37 complete
-
+;;; page 036 end
+;;; page 037 start complete
 	LDA	Game_1		;get system
 	ORA	#Hideseek_mode	;start game mode
 	STA	Game_1		;update
@@ -2248,9 +2191,8 @@ Ck_gam6:
 	BNE	Ck_gam6a	;if set then good compare
 	LDA	Qualify1	;update game qualification
 	ORA	#DQ_name	;set dis-qualified bit
-
-; page 38 complete
-
+;;; page 037 end
+;;; page 038 start complete
 	STA	Qualify1	;update system
 	JMP	Ck_gam7		;check next egg
 Ck_gam6a:
@@ -2304,10 +2246,8 @@ Ck_gam8a:
 	ORA	#Rooster_mode	;start game mode
 	STA	Game_1		;update
 	JMP	Idle		;gone
-
-
-; page 39 complete
-
+;;; page 038 end
+;;; page 039 start complete
 Ck_gam9:
 
 Ck_gamend:
@@ -2366,9 +2306,8 @@ Simon_table:
 	DB	08h,10h,01h,04h,FFh	;frnt,back,snd,lght
 
 Burp_table:
-
-; page 40 XXX
-
+;;; page 039 end
+;;; page 040 start complete
 	DB	20h,20h,20h,10h,FFh	;feed,feed,feed,back
 
 Name_egg:
@@ -2429,10 +2368,8 @@ Ck_tsk1:
 Ck_tsk4:
 	CMP	#02		;decide which
 	BNE	Ck_tsk5		;jump if not
-	
-
-; page 41 complete
-
+;;; page 040 end
+;;; page 041 start complete
 	JMP	Ck_invert	;Ck ball switch inverted sense
 Ck_tsk5:
 	CMP	#03		;decide which
@@ -2492,38 +2429,77 @@ Notrdy:
 
 	LDA	Drift_fwd	;motor drift counter 0 when done
 	BNE	Notrdy2
+;;; page 041 end
+;;; page 042 start complete
+	LDA	Drift_rev	;
+	BNE	Notrd2		;
 
-; page 42 XXX
-
-
+	LDA	Stat_2		;system
+	AND	#Macro_actv	;ck for flag request
+	BEQ	Notrdy_dn	;bail if none
+	JSR	Ck_Macro	;decide if more chaining in process
+	JMP	Notrdy2		;continue
 Notrdy_dn:
+	RTS			;only leave when everybody done
 
 Notrdy2:
+	LDA	#Motor_led_rst	;get led timer reload
+	STA	Motor_led_timer	;how long the motor stays on
+	JMP	Notrdy		;loop
+
+;*******************************************************************************
+;*******************************************************************************
+;*******************************************************************************
+;*******************************************************************************
+
+
 
 Task_1:
-
+	LDA	Stat_1		;get system
+	AND	#Word_activ	;Test for spch word active
+	BNE	W_activ		;jump if not done
+;More_spch:
+	LDA	Stat_1		;update
+	AND	#Say_active	;ck for saysent active
+	BEQ	EndTask_1	;nothing going on; ck next task
+	JSR	Do_nextset	;continue on iwth saysent
+	JMP	EndTask_1	;if no speech then ck motor
 W_activ:
-
+	LDA	Port_B		;get TI req/busy line
+	AND	#TI_RYS		;get bit
+	BNE	EndTask_1	;if no speech then ck motor
+	JSR	Do_spch		;go send next byte to TI
 EndTask_1:
-
+	RTS
+;
+;
 Task_2:
 
-Ck_motor:
+;*********  Motor Routines **********
+;
+; get next motor data
 
+Ck_motor:
+	LDA	Stat_2		;get system
+	AND	#Motor_actv	;ck motor in motion
+	BEQ	Ck_mot2		;done
+	JMP	Do_motor	;not done so check position
 Ck_mot2:
+	LDA	Stat_2		;get system
+	AND	#Motor_seek	;ck motor request
+	BEQ	NMM_out		;jmp if none
 
 Next_motor:
-
-; page 43 XXX
-
+;	LDA	Drift_fwd	;motor drift counter 0 when done
+;;; page 042 end
+;;; page 043 start XXX
 Motor_done:
 
 Motor_pause:
 
 Ck_Macro:
-
-; page 44 XXX
-
+;;; page 043 end
+;;; page 044 start XXX
 End_macro:
 
 No_macro:
@@ -2537,9 +2513,8 @@ Got_macro:
 More_motor:
 
 Mcalc_lo:
-
-; page 45 XXX
-
+;;; page 044 end
+;;; page 045 start XXX
 Test_fwdmore:
 
 Go_fwd:
@@ -2553,17 +2528,15 @@ Go_rev2:
 End_rev:
 
 Do_motor:
-
-; page 46 XXX
-
+;;; page 045 end
+;;; page 046 start XXX
 Byp_motorsS2:
 
 Byp_motorsS3:
 
 FCalc_lo:
-
-; page 47  XXX
-
+;;; page 046 end
+;;; page 047 start XXX
 Motor_dec:
 
 Motor_killfwd:
@@ -2581,9 +2554,8 @@ M_killr3:
 Motor_killend:
 
 Drift_table:
-
-; page 48 XXX
-
+;;; page 047 end
+;;; page 048 start XXX
 Motor_speed:
 
 Decide_motor:
@@ -2591,8 +2563,8 @@ Decide_motor:
 Dec_mot1:
 
 Dec_mot2:
-
-; page 49 XXX
+;;; page 048 end
+;;; page 049 start XXX
 
 Dec_mot3:
 
@@ -2607,9 +2579,8 @@ Motor_data:
 Mot_dat2:
 
 Endmotor:
-
-; page 50 XXX
-
+;;; page 049 end
+;;; page 050 start XXX
 Endtask_2:
 
 ; Start motor/speech from macro table
@@ -2617,9 +2588,8 @@ Endtask_2:
 Start_macro:
 
 Get_macro:
-
-; page 51 xxx
-
+;;; page 050 end
+;;; page 051 start XXX
 Roll_age:
 
 Same_age:
@@ -2629,9 +2599,8 @@ Dec_macro1:
 Dec_macro2:
 
 Dec_macro3:
-
-; page 52 XXX
-
+;;; page 051 end
+;;; page 052 start XXX
 Dec_macro4:
 
 Dec_macro_end:
@@ -2645,9 +2614,8 @@ Fortdelay_hi	EQU	#00h
 Game_fortune:
 
 Gam_fort2:
-
-; page 53 XXX
-
+;;; page 052 end
+;;; page 053 start XXX
 Gam_fort2a:
 
 Gam_fort3:
@@ -2656,9 +2624,8 @@ Gam_fort4:
 
 
 Fort_Name2:
-
-; page 54 XXX
-
+;;; page 053 end
+;;; page 054 start XXX
 Not_Fort2:
 
 Not_Fort3:
@@ -2674,9 +2641,8 @@ Game_Rap:
 Grap_2:
 
 Rap_over:
-
-; page 55 XXX
-
+;;; page 054 end
+;;; page 055 start XXX
 Do_rap:
 
 Rapsong:
@@ -2692,10 +2658,8 @@ Hidskwon_hi	EQU	#01H
 
 
 Game_hideseek:
-
-
-; page 56 XXX
-
+;;; page 055 end
+;;; page 056 start XXX
 Gam_hide2:
 
 Gam_hide2a:
@@ -2703,9 +2667,8 @@ Gam_hide2a:
 Gam_hide4:
 
 Gam_hide5:
-
-; page 57 XXX
-
+;;; page 056 end
+;;; page 057 start XXX
 Gam_hide8:
 
 Gam_hide9:
@@ -2719,9 +2682,8 @@ HideS_t2:
 HideS_tdn:
 
 Hide_time:
-
-; page 58 XXX
-
+;;; page 057 end
+;;; page 058 start XXX
 Hide_seek:
 
 ; Furby - Says
@@ -2737,9 +2699,8 @@ Simon_frnt_hi	EQU	#01h
 
 Simon_back_lo	EQU	#AFh
 Simon_back_hi	EQU	#01h
-
-; page 59 complete
-
+;;; page 058 end
+;;; page 059 start complete
 Simon_and_lo	EQU	#B0h	;using macro 432 for simon chooses "sound
 Simon_and_hi	EQU	#00h	;hi byte adrs 432 = 1B0h
 
@@ -2796,9 +2757,8 @@ Game_simon:
 	STA	Macro_Hi	;save hi byte of Macro table entry
 	JSR	Get_macro	;go start motor/speech
 	JSR	Notrdy		;Do / get status for speech and motor
-
-; page 60 complete
-
+;;; page 059 end
+;;; page 060 start complete
 	LDA	#Listen_me_lo	;get macro lo byte
 	STA	Macro_Lo	;save lo byte of Macro table entry
 	LDA	#Listen_me_hi	;get macro hi byte
@@ -2858,9 +2818,8 @@ Simon3a:
 	JMP	Simon3dn	;go speak it
 Simon3b:
 	CMP	#04h		;light
-
-; page 61 compete
-
+;;; page 060 end
+;;; page 061 start complete
 	BNE	Simon3c		;jump if not
 	LDA	#Skeylght_lo	;get macro lo byte
 	STA	Macro_Lo	;save lo byte of Macro table entry
@@ -2918,9 +2877,8 @@ Simon_lost:
 ;	CMP	#Do_invert	:?
 ;	BEQ	Simon_over	;bail out if is
 	LDA	#Simonlost_lo	;get macro lo byte
-
-; page 62 XXX
-
+;;; page 061 end
+;;; page 062 start complete
 Simon_won:
 
 Rotate_play:
@@ -2930,9 +2888,8 @@ Recover_play:
 Simon_over:
 
 Simon_sensor:
-
-; page 63 XXX
-
+;;; page 062 end
+;;; page 063 start XXX
 Simon_delay:
 
 Simon_random:
@@ -2946,9 +2903,8 @@ Psimon_table:
 Simon_convert:
 
 Simon_won_tbl:
-
-; page 64 XXX
-
+;;; page 063 end
+;;; page 064 start XXX
 End_allGames:
 
 Saygamdn_lo	EQU	#D9h
@@ -2960,9 +2916,8 @@ Bursnd_hi	EQU	#01h
 Game_Burp:
 
 Game_name:
-
-; page 65 XXX
-
+;;; page 064 end
+;;; page 065 start XXX
 Twinllsnd_lo	EQU	#D5h
 Twinklsnd_hi	EQU	#01h
 
@@ -2972,9 +2927,8 @@ Sleep_hi	EQU	#00h
 Game_twinkle:
 
 Gtwnk:
-
-; page 66 XXX
-
+;;; page 065 end
+;;; page 066 start XXX
 Start_sleep:
 
 Roostersnd_lo	EQU	#D4h
@@ -2983,9 +2937,8 @@ Roostersnd_hi	EQU	#01h
 Game_rooster:
 
 Test_all_sens:
-
-; page 67 XXX
-
+;;; page 066 end
+;;; page 067 start XXX
 Ck_tilt:
 
 Get_tilt:
@@ -2997,10 +2950,8 @@ Do_bside:
 Normal_tilt:
 
 More_tilt:
- 
-
-; page 68 XXX
-
+;;; page 067 end
+;;; page 068 start XXX
 Tilt_reset:
 
 Tile_side:
@@ -3010,10 +2961,8 @@ Tilt_ran:
 Ck_invert:
 
 Get_invert:
-
-
-; page 69 XXX
-
+;;; page 068 end
+;;; page 069 start XXX
 Invrt_out
 
 Do_binvrt
@@ -3021,9 +2970,8 @@ Do_binvrt
 Normal_invert
 
 More_invert:
-
-; page 70 XXX
-
+;;; page 069 end
+;;; page 070 start XXX
 Invrt_reset:
 
 Invrt_set:
@@ -3037,11 +2985,8 @@ Get_back:
 Tch1_out:
 
 Do_tch_bk:
-
-
-
-; page 71 XXX
-
+;;; page 070 end
+;;; page 0571 start XXX
 Normal_back:
 
 More_back:
@@ -3051,11 +2996,8 @@ Back_reset:
 Back_set:
 
 Back_rnd:
-
-
-
-; page 72 XXX
-
+;;; page 071 end
+;;; page 072 start XXX
 Ck_IR:
 
 CKIR_S:
@@ -3063,9 +3005,8 @@ CKIR_S:
 IR_req:
 
 Got_IR:
-
-; page 73 XXX
-
+;;; page 072 end
+;;; page 073 start XXX
 Got_IR2:
 
 New_IT
@@ -3079,9 +3020,8 @@ No_sneeze:
 Get_IR_rnd:
 
 NormIR_2:
-
-; page 74 XXX
-
+;;; page 073 end
+;;; page 074 start XXX
 NormIR_3:
 
 NormIR_4:
@@ -3097,12 +3037,8 @@ Get_front:
 Touch_end:
 
 Do_tch_ft:
-
-
-
-
-; page 75 XXX
-
+;;; page 074 end
+;;; page 075 start XXX
 Normal_front:
 
 More_front:
@@ -3112,9 +3048,8 @@ Front_reset:
 Front_set
 
 Front_rnd:
-
-; page 76 complete
-
+;;; page 075 end
+;;; page 076 start complete
 	LDA	#Front_ID	;which rom location for learned word count (offset)
 	JSR	Start_learn	;go record training info
 	LDA	IN_DAT		;get back word to speak
@@ -3147,8 +3082,8 @@ Get_feed		;this is the subroutine entry point
 
 ; Each trigger increments the health status at a greater rate
 
-; Special enable routime to haare port pin D1 with invert switch.
-; Feed switch is pulled hi by the DAC1 (aud-a_ output only after
+; Special enable routine to share port pin D1 with invert switch.
+; Feed switch is pulled hi by the DAC1 (aud-a) output only after
 ; we test the invert line. If invert is not hi, then turn on
 ; DAC1 and ck feed line on same port D1.
 
@@ -3174,9 +3109,8 @@ Feed_out:
 
 Start_feed:
 	LDA	#00
-
-; page 77 complete
-
+;;; page 076 end
+;;; page 077 start complete
 	STA	DAC2		;clear feed sw enable
 
 ;	LDA	Stat_3		;get system
@@ -3239,9 +3173,8 @@ Feeding_dn:
 	STA	Feed_count	;
 	JMP	Feed_set	;do it
 Feed_reset:
-
-; page 78 complete
-
+;;; page 077 end
+;;; page 078 start complete
 	LDA	#00		;reset to 1st entry of sequential
 	STA	BIT_CT		;temp store
 	STA	Feed_count	;
@@ -3302,11 +3235,8 @@ More_light:
 
 	LDA	#Light_split	;get random/sequential split
 	STA	IN_DAT
-
-
-
-; page 79 XXX
-
+;;; page 078 end
+;;; page 079 start XXX
 Lght_reset:
 
 Light_set:
@@ -3314,9 +3244,8 @@ Light_set:
 Lghtrand:
 
 Do_dark:
-
-; page 80 XXX
-
+;;; page 079 end
+;;; page 080 start XXX
 Ck_sound:
 
 Ck_sound2:
@@ -3328,9 +3257,8 @@ Ck_snd2:
 Ck_snd3:
 
 Snd_over:
-
-; page 81 XXX
-
+;;; page 080 end
+;;; page 081 start XXX
 Ck_snd4:
 
 No_snd:
@@ -3340,24 +3268,20 @@ No_snd2:
 Normal_sound:
 
 More_sound:
-
-
-; page 82 XXX
-
+;;; page 081 end
+;;; page 082 start XXX
 Snd_reset:
 
 Snd_set:
 
 Sndrand:
-
-; page 83 XXX
-
+;;; page 082 end
+;;; page 083 start XXX
 Start_learn:
 
 Not_BCK:
-
-; page 84 XXX
-
+;;; page 083 end
+;;; page 084 start XXX
 Do_lrn2:
 
 Do_lrn2a:
@@ -3369,10 +3293,8 @@ Learn_update:
 Lrn_upd1:
 
 Lrn_upd2:
-
-
-; page 85 complete
-
+;;; page 084 end
+;;; page 085 start complete
 ; on 1st cycle of new learn, we set counter 1/2 way ..... (chicken)
 
 	BNE	Lrn_upd2a	;jmp if not 0
@@ -3429,9 +3351,8 @@ Kick2:
 Do_EE_write:
 
 ; EEPROM WRITE
-
-; page 86 complete
-
+;;; page 085 end
+;;; page 086 start complete
 ; Enter with 'TEMP0' holding adrs of 0-63. Areg holds lo byte and
 ; Xreg holds hi byte. IF carry is clear then it was successful, if
 ; carry is set the write failed.
@@ -3490,10 +3411,8 @@ S_EEPROM_READ:
 ;     on call: X = EEPROM data addrss (0-63)
 ;     on return: ACC = EEPROM data (low byte)  (also in TEMP0)
 ;                X = EEPROM data (high byte)  (alsi in TEMP1)
-
-; page 87 complete
-
-
+;;; page 086 end
+;;; page 087 start complete
 	LDA	#00		;use DAC output to put R1 in rest
 	STA	DAC1		;
 	SEI			;turn IRQ off
@@ -3549,10 +3468,8 @@ Read_loop:
 ;     stack usage: 0
 ;     RAM usage: B_IMG
 ;
-
-
-; page 88 complete
-
+;;; page 087 end
+;;; page 088 start complete
 ;*******************************************************************************
 ;
 EEENA:
@@ -3611,9 +3528,8 @@ TOGCLK:
 	NOP			;
 	AND	#0FEH		;turn off A.0
 	STA	Port_A		;output to port
-
-; page 89 complete
-
+;;; page 088 end
+;;; page 089 start complete
 	STA	Port_A_image	;save image
 	RTS
 ;
@@ -3669,12 +3585,8 @@ EERD10:
 	ROL	TEMP0		;rotate data bit into 16-bit
 	ROL	TEMP1		; accumulator
 	DEX			;bump bit counter
-
-
-
-
-; page 90 complete
-
+;;; page 089 end
+;;; page 090 start complete
 	BNE	EERD04		; and repeat until done
 ;
 	JSR	EEDIS		;turn off CS and return
@@ -3732,14 +3644,8 @@ EEWE04:
 ;	on return: C = 0 on succesful write cycle
 ;	           C = 1 on write cycle time out
 ;	stack usage: 4
-
-
-
-
-
-; page 91 complete
-
-
+;;; page 090 end
+;;; page 091 start complete
 ;	RAM usage: TEMP0, TEMP1, TEMP2
 ;
 Y;*******************************************************************************
@@ -3800,10 +3706,8 @@ EEWR08:
 ;
 	JSR	EEWR10		;time out, disable EEPROM and
 	SEC			; set carry to signal error
-
-	
-; page 92 complete
-
+;;; page 091 end
+;;; page 092 start complete
 	RTS			;
 ;
 EEWR10:
@@ -3865,11 +3769,8 @@ Nospc1_age:
 	BNE	Dec_age3	;jump iof not
 	LDA	#96	;point to 4th field
 	JMP	Do_age	;finish load from table
-
-
-
-; page 93  complete
-
+;;; page 092 end
+;;; page 093 start complete
 Dec_age3:
 	CMP	#02		;is it age 3
 	BNE	Dec_age2	;jump if not
@@ -3927,10 +3828,8 @@ Ran_loop:
 	STA	TEMP1		;new
 
 	LDA	TEMP5		;ck if no sequentials
-
-
-; page 94 complete
-
+;;; page 093 end
+;;; page 095 start complete
 	BEQ	Ran_decisn	;force random if none
 
 	JSR	Random		;get random/sequention decision
@@ -3986,16 +3885,13 @@ Random:
 
 ;*******************************************************************************
 ;*******************************************************************************
-
-; page 95 XXX
-
+;;; page 094 end
+;;; page 095 start XXX
 Life:
 
 frst_life:
-
-
-; page 96 XXX
-
+;;; page 095 end
+;;; page 096 start XXX
 Max_Sref:
 
 fret_sick:
@@ -4013,11 +3909,8 @@ Hunger2:
 Decd_Hung_sck_norm:
 
 Decd_Hung_norm:
-
-
-
-; page 97 XXX
-
+;;; page 096 end
+;;; page 097 start XXX
 Decd_Sick_norm:
 
 Decd_Hung_Sick:
@@ -4031,11 +3924,8 @@ Hunger_side:
 Hunger_ran:
 
 Say_sick:
-
-
-
-; page 98 XXX
-
+;;; page 097 end
+;;; page 098 start XXX
 Sick_reset:
 
 Sick_side:
@@ -4047,19 +3937,15 @@ GoToSleep:
 Nodrk_prev:
 
 Os2:
-
-
-
-; page 99 XXX
-
+;;; page 098 end
+;;; page 099 start XXX
 IWrite_loop:
 
 GoToSleep_2:
 
    Include Sleep.asm
-
-; page 100 XXX
-
+;;; page 099 end
+;;; page 100 start XXX
 NMI:
 
 IRQ:
@@ -4071,11 +3957,8 @@ Ck_timerB:
 Do_timeB:
 
 Cal_noroll:
-
-
-
-; page 101 XXX
-
+;;; page 100 end
+;;; page 101 start XXX
 No_cal_sw:
 
 No_lim_stp:
@@ -4095,10 +3978,8 @@ TimeB2:
 TimeB3:
 
 TimerB_dn:
-
-
-; page 102 XXX
-
+;;; page 101 end
+;;; page 102 start XXX
 Clr_pos:
 
 ExtportC:
@@ -4110,10 +3991,8 @@ Cnt_rev:
 Cnt_dn:   ; XXX ????
 
 Updt_cnt:
-
-
-; page 103 XXX
-
+;;; page 102 end
+;;; page 103 start XXX
 Pc_done:
 
 Mot_led_off:
@@ -4125,34 +4004,129 @@ M_drft_F1:
 M_drft_F2:
 
 M_drft_R1:
-
-; page 104 XXX
-
+;;; page 103 end
+;;; page 104 start complete
+	JMP	Intt_motor_end
 M_drft_R2:
+	DEC	Drift_rev	;-1
+	LDA	Port_D_Image	;get system
+	ORA	#Motor_off	;turn both motors off
+	JMP	Intt_motor_end
 
 Intt_motor:
+	LDA	Stat_3
+	AND	#C0h		;get motor command bits
+	STA	Intt_Temp	;save motor direction
 
+;________ Furby16 ... move potor pulse width to interrupt routine
+
+	LDA	Motor_pulse1	;get on time
+	BEQ	Intmotor1	;jump if 0
+	DEC	Motor_pulse1	;-1
+	JMP	Intmotor_dn	;exit (dont change Intt_temp if on)
 Intmotor1:
-
-IntMotor2:
-
+	LDA	Motor_pulse2	;get off time
+	BEQ	Intmotor2	;got reset timer
+	DEC	Motor_pulse2	;-1
+	LDA	#C0h		;shut motor off
+	STA	Intt_Temp	;
+	JMP	Intmotor_dn	;exit
+Intmotor2:
+	LDA	Mon_len		;reset on time
+	STA	Motor_pulse1	;
+	LDA	Moff_len	;reset off time
+	STA	Motor_pulse2	;
 Intmotor_dn:
 
+;----- end motor pulse width
+
+	LDA	Port_D_Image	;get system
+	AND	#3Fh		;clear motor direction bits
+	CLC
+	ADC	Intt_Temp	;put in motor commands
+
+
 Intt_motor_end:
+	STA	Port_D_Image	;update system
 
-Intt_done:
+; at Tracker
+	EOR	#%11000000	;;Tracker add  invert motor drivers
+; end Tracker
 
+	STA	Port_D		;output
+
+Intt_done:			;general return
+
+	LDA	Stat_3		;system
+	ORA	#IRQ_dn		;flag system IRQ occured
+	STA	Stat_3		;update
 Intt_false:
+	LDA	#00H		;clear all intts first
+	STA	Interrupts	;
+	  LDA	  #Intt_dflt	;get default for interrupt reg
+	  STA	  Interrupts	;set rag & clear intt flag
 
+	PLP			;recover CPU
+;;; page 104 end
+;;; page 105 start complete
+	PLA			;recover ACC
 
-; page 105 XXX
+	RTI			;reset interrupt
+
+;*******************************************************************************
+;*******************************************************************************
+;*******************************************************************************
+
+; Communication protocol iwth the TI is:
+;
+;    FF is a no action command. (used as end of speech command)
+;    FE sets the command data mode an the TI expects two
+;    additional data bytes to complete the string. (3 TOTAL)
+;    ALL OTHERS (0-FD) ARE CONSIDERED START OF A SPEECH WORD !
+;    Command data structure is BYTE 1 + BYTE 2 + BYTE 3
+
+; BYTE 1 is always FE
+
+; Command 1
+;    BYTE 2 = FE is pitch table control;
+;    BYTE 3 = bit 7 set = subtract value from current course value
+;                   clr = add value to current course value
+;             bit 6 set = select music pitch table
+;                    clr = select normal speech pitch table
+;             bit 0-5 value to change course value (no change = 0)
+;
+; Command 2
+;    BYTE 2 = FD is Infrared transmit cmnd
+;    BYTE 3 = Is the I.R> code to send  ( 0 - 0Fh only)
+;
+; Command 3
+;    BYTE 2 = FC is the speech speed control
+;    BYTE 3 = a value of 0 -255 where 2Eh is normal speed
+
+; Enter subroutine with TEMP1 = command byte (1st)
+;                       TEMP2 = data byte (2nd)
 
 Xmit_TI:
+	LDA	#FEh		;tells TI command data to follow
+	JSR	Spch_more	;out data
+	LDA	TEMP1		;command code
+	JSR	Spch_more	;out data
+	LDA	TEMP2		;data to send
+	JSR	Spch_more	;out data
+	RTS			;done
+
+;*******************************************************************************
+;*******************************************************************************
+;
+; There is an entry for each back of speech and only the words in that
+; back are in the list. THis is a subroutine call.
+
+; The first time thru, we call SYA_x and as long as WORD_ACTIV of SAY_ACTIV
+; is set we call DO_NEXTSENT until saysent is fone.
 
 ; There are 4 groups of 128 pointers in each group. This gives 512 saysents.
-
-; page 106 complete
-
+;;; page 105 end
+;;; page 106 start complete
 ; 1. Enter with 'Which_word' hold 0127 and 'Sgroup' for the 1 of 4 tables
 ;    which point to two byte adrs of a saysent. These two bytes are
 ;    loaded into Saysent_lo & Saysent_hi.
@@ -4178,14 +4152,14 @@ Dec_say1:
 	INX			;X+1
 	LDA	Spch_grp1,X	;get hi pointer
 	STA	Saysent_hi	;save
-	JMP	Dec_sys5	;go calc word
+	JMP	Dec_say5	;go calc word
 Dec_say2:
 	LDA	Spch_grp2,X	;get lo pointer
 	STA	Saysent_lo	;save
 	INX			;X+1
 	LDA	Spch_grp2,X	;get hi pointer
 	STA	Saysent_hi	;save
-	JMP	Dec_sys5	;go calc word
+	JMP	Dec_say5	;go calc word
 Dec_say3:
 	LDA	Spch_grp3,X	;get lo pointer
 	STA	Saysent_lo	;save
@@ -4205,12 +4179,11 @@ Dec_say5:
 	LDA	#FCh		;command for TI to except speed data
 	STA	TEMP1		;
 	JSR	Xmit_TI		;send it ti TI
-	INC	Saysend_lo	;next saysent pointer
+	INC	Saysent_lo	;next saysent pointer
 	BNE	Xney_say	;jump if no roll over
 	INC	Saysent_hi	;+1
-
-; page 107 complete
-
+;;; page 106 end
+;;; page 107 start complete
 Xney_say:
 	LDX	#00		;no offsett
 	LDA	(Saysent_lo,X)	;get data @ 16 bit adrs
@@ -4269,10 +4242,8 @@ Get_group1:
 	LDA	Which_word	;selection
 	CLC
 	SBC	#122		;ck if in bank 2
-
-
-; page 108 complete
-
+;;; page 107 end
+;;; page 108 start complete
 	LDA	#01		;set bank
 	  STA	  Bank_ptr	;Bank number
 	CLC
@@ -4331,6 +4302,7 @@ Do_spch:
 	LDA	Stat_1		;get system
 	AND	#Word_term	;was it prev set
 	BEQ	Set_end		;nope
+;;; page 109 end
 
 
 

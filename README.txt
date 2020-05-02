@@ -44,6 +44,6 @@ The scan appears to contain the contents of several files:
 
 The labels "TI_reset" and "Name_table" are not defined in the scanned document.
 
-The code definig the reset and interrupt vectors is missing..
+The code defining the reset and interrupt vectors is missing..
 
 

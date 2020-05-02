@@ -1,6 +1,4 @@
-; LIGHT5
-; page 111 (page 1) XXX
-
+;;; page 111 start XXX; LIGHTS page 1
 Bright		EQU	15
 Dim		EQu	15
 
@@ -9,9 +7,8 @@ Shift_reff	EQU	10
 Dark_sleep	EQU	B0h
 
 Get_light:
-
-; page 112 (page 2) XXX
-
+;;; page 111 end
+;;; page 112 start XXX; LIGHTS page 2
 Ck_lght2:
 
 Cklt2a:
@@ -25,9 +22,8 @@ Vk_lght4:
 Ck_lght4a:
 
 Lght4cmp:
-
-; page 113 (page 3) XXX
-
+;;; page 112 end
+;;; page 113 start XXX; LIGHTS page 3
 Light_byte:
 
 Ck_lght4b:
@@ -41,9 +37,8 @@ Light_brt:
 Lght_fail:
 
 Do_lght:
-
-; page 114 (page 4) XXX
-
+;;; page 113 end
+;;; page 114 start XXX; LIGHTS page 4
 Rst_shftup:
 
 New_ltreff:
@@ -51,9 +46,8 @@ New_ltreff:
 Ck_drk:
 
 Kill_ltrf:
-
-; page 115 (page 5) XXX
-
+;;; page 114 end
+;;; page 115 start XXX; LIGHTS page 5
 Ret_shftdn:
 
 Kill_shift:
@@ -65,5 +59,4 @@ Do_ltchg:
 LT_ref_brt:
 
 Ltref_egg:
-
-
+;;; page 115 end
