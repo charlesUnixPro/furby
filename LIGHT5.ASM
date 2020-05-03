@@ -17,7 +17,7 @@ Ck_lght3:
 
 Ck_lt3a:
 
-Vk_lght4:
+Ck_lght4:
 
 Ck_lght4a:
 
@@ -52,7 +52,7 @@ Ret_shftdn:
 
 Kill_shift:
 
-No_lt_doto:
+No_lt_todo:
 
 Do_ltchg:
 

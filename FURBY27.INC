@@ -1,18 +1,19 @@
 ;;; page 126 start complete; FURBY27.INC page 1
 ; Furby27.inc ;;  change twinkle egg song to one pass in macro
 
-; Lowered voice_10,voice_9 to voice_8
+
+; Lowered voice+10,voice+9 to voice+8
 ; Wayne's mods:
 ; Furby5b.inc = add voice selection table
 ;
 ; Dave's
 ; added feed (mouth open)
-; 170,171,173,174,175,182,183,180,191,194
+; 170,171,173,174,175,182,183,190,191,194
 ; mod for ir
-; NOW 24 NAMES;
+; NOW 24 NAMES
 ;
 ;TABLES         MACRO   |SAY
-;--------------------------------------------
+;-------------------------------------
 ;FRONT          2-64    |1-61
 ;FORTUNE        65-83   |62-78
 ;o-too-mah      84
@@ -23,13 +24,13 @@
 ;HUNGER         170-201 |157-168
 ;INVERT         202-238 |169-192
 ;BACK           239-275 |193-236
-;SICK           276-292 |237-350
+;SICK           276-292 |237-250
 ;LIGHT          293-307 |251-265
 ;DARK           308-331 |266-289
 ;SOUND          332-351 |290-309
 ;TILT           352-392 |310-350
 ;IR             393-429 |351-390
-;FURBY SAYS     430-434 |50 TICKLE,196 PET,81 SOUND,391 LIGHT,198 PURR
+;FURBY SAYS     430-434 |50 TICKLE,196 PET,71 SOUND,391 LIGHT,198 PURR
 ;               435,436 |392 NO LIGHT, 393 LOUD SOUND
 ;               437,438 |115,116	; hide and seek sounds
 ;               95,96,97|98,99,100	; hide and seek reuse
@@ -46,7 +47,7 @@
 ;               460     | 399,395,120   ; me ay-tay    (hungry)
 ;                       | 399           ; delay 1.3    seconds
 ;               461     | 399,395,131   ; me way-loh   (sleep)
-;               462     | 399,395,143   ; me u-tye     (light)
+;               462     | 399,395,143   ; me u-tye     (up)
 ;               463     | 399,395,145   ; me ay-loh    (light)
 ;               464     | 399,395,152   ; me kah       (me)
 ;               465     | 399,395,166   ; me dah       (big)
@@ -78,15 +79,14 @@
 ;
 ;not used       476-511 |413-510
 
-
 ; TRAP FOLLOW MACROS FOR NAME
 ;
 ; SENSOR
-; HANGOUT 96
+; HANGOUT 97
 ; WAKE-UP 149
 ; BACK 248
-; LIGHT BRIGHT 205
-; IR 393,494,414,421
+; LIGHT BRIGHT 305
+; IR 393,404,414,421
 ;
 ; GAMES
 ; FORTUNE 69,77
@@ -106,20 +106,22 @@
 ;*******************************************************************************
 
 ; Sensor tables
-; Each sensor has 4 speech/motor tables based on age 1-4, of 16 entrues each.
+; Each sensor has 4 speech/motor tables based on age 1-4, of 16 entries each.
 ; These tables are 16 bit entries, the user enters as a decimal 1-511
-; ***** '00' is illegal *****
+; **** '00' is illegal ****
 ; This number calls the MACRO tables to get specific speech and motor
-; tables. MACRO tables chain together multile motor and speech tables.
-; The first 8 entries o speech is random selections and
+; tables. MACRO tables chain together multiple motor and speech tables.
+; The first 8 entries of speech is random selections and
 ; the second 8 entries is sequential.
 
-; one of three voice pitch selectsion, randomly load table and
+
+;
+;
+; one of three voice pitch selections, randomly load table and
 ; table is randomly called on power up to select a new voice.
-; This gives a number added to voice 3 to create which voice will be
+; THis gives a number added to voice 3 to create which voice will be used.
 ;;; page 127 end
 ;;; page 128 start complete; FURBY27.INC page 3
-; used.
 
 Voice_table:
 	DB	S_voice1
@@ -155,9 +157,9 @@ Tilt_S1:	DW	352	; #1  AGE 1
 	DW	361	; #11 AGE 1
 	DW	362	; #12 AGE 1
 	DW	363	; #13 AGE 1
-	DW	362	; #14 AGE 1
+	DW	352	; #14 AGE 1
 	DW	364	; #15 AGE 1
-	DW	355	; #16 AGE 1
+	DW	365	; #16 AGE 1
 
 Tilt_S2:	DW	366	; #1  AGE 2
 	DW	367	; #2  AGE 2
@@ -172,7 +174,7 @@ Tilt_S2:	DW	366	; #1  AGE 2
 	DW	371	; #11 AGE 2
 	DW	372	; #12 AGE 2
 	DW	373	; #13 AGE 2
-	DW	375	; #14 AGE 2
+	DW	374	; #14 AGE 2
 	DW	365	; #15 AGE 2
 	DW	375	; #16 AGE 2
 
@@ -211,9 +213,10 @@ Tilt_S4:	DW	366	; #1  AGE 4
 	DW	375	; #14 AGE 4
 	DW	384	; #15 AGE 4
 	DW	392	; #16 AGE 4
-
-
-Sick_S1:	DW	276	; #1  AGE 1
+;
+;
+Sick_S1:
+	DW	276	; #1  AGE 1
 	DW	280	; #2  AGE 1
 	DW	283	; #3  AGE 1
 	DW	286	; #4  AGE 1
@@ -221,8 +224,6 @@ Sick_S1:	DW	276	; #1  AGE 1
 	DW	288	; #6  AGE 1
 	DW	289	; #7  AGE 1
 	DW	290	; #8  AGE 1
-;;; page 129 end
-;;; page 130 start complete; FURBY27.INC page 5
 	DW	291	; #9  AGE 1
 	DW	292	; #10 AGE 1
 	DW	288	; #11 AGE 1
@@ -232,7 +233,8 @@ Sick_S1:	DW	276	; #1  AGE 1
 	DW	291	; #15 AGE 1
 	DW	292	; #16 AGE 1
 
-Sick_S2:	DW	277	; #1  AGE 2
+Sick_S2:
+	DW	277	; #1  AGE 2
 	DW	280	; #2  AGE 2
 	DW	284	; #3  AGE 2
 	DW	286	; #4  AGE 2
@@ -240,6 +242,8 @@ Sick_S2:	DW	277	; #1  AGE 2
 	DW	288	; #6  AGE 2
 	DW	289	; #7  AGE 2
 	DW	290	; #8  AGE 2
+;;; page 129 end
+;;; page 130 start complete; FURBY27.INC page 5
 	DW	291	; #9  AGE 2
 	DW	292	; #10 AGE 2
 	DW	288	; #11 AGE 2
@@ -250,7 +254,8 @@ Sick_S2:	DW	277	; #1  AGE 2
 	DW	292	; #16 AGE 2
 
 
-Sick_S3:	DW	276	; #1  AGE 3
+Sick_S3:
+	DW	276	; #1  AGE 3
 	DW	281	; #2  AGE 3
 	DW	285	; #3  AGE 3
 	DW	287	; #4  AGE 3
@@ -267,7 +272,9 @@ Sick_S3:	DW	276	; #1  AGE 3
 	DW	291	; #15 AGE 3
 	DW	292	; #16 AGE 3
 
-Sick_S4:	DW	279	; #1  AGE 4
+
+Sick_S4:
+	DW	279	; #1  AGE 4
 	DW	282	; #2  AGE 4
 	DW	285	; #3  AGE 4
 	DW	287	; #4  AGE 4
@@ -283,6 +290,7 @@ Sick_S4:	DW	279	; #1  AGE 4
 	DW	290	; #14 AGE 4
 	DW	291	; #15 AGE 4
 	DW	292	; #16 AGE 4
+
 
 ; SWITCH FOR DO SOUND) js
 Sound_S1:	DW	332	; #1  AGE 1
@@ -308,7 +316,7 @@ Sound_S2:	DW	332	; #1  AGE 2
 	DW	333	; #2  AGE 2
 	DW	340	; #3  AGE 2
 	DW	341	; #4  AGE 2
-	DW	341	; #5  AGE 2
+	DW	342	; #5  AGE 2
 	DW	337	; #6  AGE 2
 	DW	343	; #7  AGE 2
 	DW	344	; #8  AGE 2

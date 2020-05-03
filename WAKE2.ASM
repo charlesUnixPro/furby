@@ -9,7 +9,7 @@ Dbnc_1p3:
 
 Dbnc_1p4:
 Dbnc_1p5:
-Test_sleep
+Test_sleep:
 Power_Port_D:
 
 Power_battery:
