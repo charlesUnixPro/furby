@@ -1108,7 +1108,7 @@ RESET:
 
 
 
-Include Wake2.asm	;asm file
+    Include Wake2.asm	;asm file
 
 
 
@@ -2497,7 +2497,7 @@ Task_1:
 	JMP	EndTask_1	;Next task
 W_activ:
 	LDA	Port_B		;get TI req/busy line
-	AND	#TI_RYS		;get bit
+	AND	#TI_RTS		;get bit
 	BNE	EndTask_1	;if no speech then ck motor
 	JSR	Do_spch		;go send next byte to TI
 EndTask_1:
@@ -2525,6 +2525,8 @@ Next_motor:
 ;;; page 042 end
 ;;; page 043 start XXX
 Motor_done:
+
+NMM_out:
 
 Motor_pause:
 
