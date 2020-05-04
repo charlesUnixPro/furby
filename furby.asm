@@ -1144,8 +1144,8 @@ InitIO:
 	LDA	#00h		;disable sleep control
 	STA	Sleep		;set dont care
 
-	  LDA	  #Intt_dflt	;Initialize timers, etc.
-	  STA	  Interrupts	;load reg
+	LDA	#Intt_dflt	;Initialize timers, etc.
+	STA	Interrupts	;load reg
 
 	LDA	#00H		;set timer mode
 	STA	TMA_CON		;set reg
@@ -1212,7 +1212,7 @@ InitIO:
 
 Diag_macro:
 	STA	Macro_Lo	;save lo byte of Macro table entry
-	  LDA	     #0b8h	;#90h	;hex offset to adrs 400 added to diag call
+	LDA	#0b8h	;#90h	;hex offset to adrs 400 added to diag call
 	CLC
 	ADC	Macro_Lo		;add in offset
 	STA	Macro_Lo		;update
@@ -2507,174 +2507,804 @@ Ck_mot2:
 Next_motor:
 ;	LDA	Drift_fwd	;motor drift counter 0 when done
 ;;; page 042 end
-;;; page 043 start XXX
-Motor_done:
+;;; page 043 start complete
+;	BNE	NMM_out		;wait til 0
+;	LDA	Drift_rev		;
+;	BNE	NMM_out		;wait til 0
 
+
+; Set a timer and ck counter 'motorstoped' (incremented with wheel count)
+; to see if it changed. When it stops changing then the motor has stopped.
+
+	LDA	motorstoped	;ck for 0
+	BNE	NMM_out		;wait till 0
+	LDA	TEMP1		;get last motor count
+	CMP	Pot_timeL		;ck if changed
+	BEQ	Motor_done	;jump if same (motor finally stopped)
+	LDA	Pot_timeL		;get current
+	STA	TEMP1		;
+	LDA	#15		;reset timer (8)
+	STA	motorstoped	;
+	JMP	NMM_out		;wait another cycle
+
+Motor_done:
+	LDA	Cycle_timer	;get step timer
+	BNE	NMM_out		;wait til 0
+
+	STA	Drift_counter	;use as a temp register
+
+	JSR	Motor_data	;get data
+
+	LDA	#00
+	STA	TEMP1		;reset
+
+	LDA	Motor_lo		;get data (use for 1byte table (DB))
+	CMP	#FFh		;is it table end (dont inc off end)
+	BNE	Motor_pause	;more
+	LDA	Stat_2		;get system
+	AND	#Motor_ntseek	;clear seek flag
+	STA	Stat_2		;update system
 NMM_out:
+	JMP	Endtask_2		;seek complete
 
 Motor_pause:
+	LDA	Motor_lo		;check for pause request on this step (00)
+	BNE	More_motor	;more
+	JMP	Motor_killend	;set cycle timer and wait for next motor step
+;
+;
+; To initialize the motor call table, the originator loads 'Which_motor'
+; with the pointer and calls 'Decide_motor'.
 
 Ck_Macro:
+	JSR	Next_macro	;get data
+	STA	Which_motor	;save motor seek pointer
+	JSR	Next_macro	;get data
+	STA	Mgroup		;save high byte
+	CMP	#00h		;check for end of macro
+	BNE	Got_macro		;do it if not 0
+	LDA	Which_motor	;ck lo byte for 0
+	CMP	#00h		;check for end of macro
 ;;; page 043 end
-;;; page 044 start XXX
+;;; page 044 start complete
+	BNE	Got_macro		;do it if not 0 else must be end command
 End_macro:
-
+	LDA	Stat_2		;get system
+	AND	#Nt_macro_actv	;clear request
+	STA	Stat_2		;update
+;	LDA	#Bored_reld	;reset bored timer
+;	STA	Bored_timer	;
 No_macro:
-
+	RTS			;done
+;
 Next_macro:
-
+	LDX	#00H
+	LDA	(Macro_Lo,X)	;get speech/motor table request
+	INC	Macro_Lo		;next
+	BNE	Mac_dat2		; jmp in no roll over
+	INC	Macro_Hi		;rolled over so hi +1
 Mac_dat2:
-
+	RTS			;
+;
 Got_macro:
 
+; The speech and motor pointer table pointer from the sensor table , are
+; a 1-999 decimal number. The assemble converts to two 8 bit numbers and
+; this creates a one of four group of 128 byte pointers in each group.
+; We also do 2's offset for table lookup.
+
+	CLC			;do motor
+	ROL	Which_motor	;move hi bit to carry
+	ROL	Mgroup		;move carry into one of four group ptr
+
+	LDA	Which_motor	;offset
+	STA	Which_word	;set speech group pointers
+	LDA	Mgroup		;offset
+	STA	Sgroup		;
+	JSR	Decide_motor	;start motor routine
+	JSR	Say_0		;start speech routine
+	RTS			;back to task master
+
+;
+;**************************************************************
+
 More_motor:
+	LDA	Stat_3		;system
+	ORA	#Motor_on		;flag  on mode
+	STA	Stat_3		;update
+;m	LDA	Mon_len		;get length of on pulse
+;m	STA	Motor_pulse	;set timer
+
+	LDA	Stat_2		;get system
+	ORA	#Motor_actv	;set motor in motion
+	STA	Stat_2		;update
 
 Mcalc_lo:
+
+; When motor stops, if the IR detector is on the slot in the wheel, no
+; action is needed. If passed the slot, when the next motion command occurs,
+; if the direction is the same as the last motion, no action is needed
+; If the direction is opposit to last motion then we decrement or
 ;;; page 044 end
-;;; page 045 start XXX
-Test_fwdmore:
+;;; page 045 start complete
+; increment, based on new direction, to compensate for the slot which
+; will be counted twice.
+
+	LDA	Motor_lo		;get data
+	CMP	Pot_timeL		;ck for same
+	BNE	Tst_fwdmore	;jump if not 0
+	LDA	Stat_2		;get system
+	AND	#Motor_inactv	;clear activ flag
+	STA	Stat_2		;update system
+	JMP	Endtask_2		;bail out
+Tst_fwdmore:
+	CLC
+	SBC	Pot_timeL		;get current position
+	BCC	Go_rev		;if borrow then dec command
 
 Go_fwd:
+	LDA	Port_C		;get IR detector
+	AND	#Pos_sen		;
+	BEQ	Go_fwd2		;bypass if sensor is over slot in wheel
+	LDA	Stat_2		;get system
+	AND	#Motor_fwd	;get direction motor was last headed
+	BNE	Go_fwd2		;if set then new direction is same as last
+	DEC	Pot_timeL2	;compensate for counter direction reversal
 
 Go_fwd2:
-
+	LDA	Stat_2		;get system
+	ORA	#Motor_fwd	;set = motor fwd (inc)
+	ORA	#Motor_actv	;set motor in motion
+	STA	Stat_2		;update system
+	LDA	Stat_3		;get current status
+	ORA	#Motor_off	;turn both motors off
+	AND	#Motor_fwds	;move motor in fwd dir
+	JMP	End_rev		;go finish port setup
+;
 Go_rev:
+	LDA	Port_C		;get IR detector
+	AND	#Pos_sen		;
+	BEQ	Go_rev2		;bypass if sensor is over slot in wheel
+	LDA	Stat_2		;get system
+	AND	#Motor_fwd	;get direction motor was last headed
+	BEQ	Go_rev2		;if clr then new direction is same as last
+	INC	Pot_timeL2	;compensate for counter direction reversal
 
 Go_rev2:
-
+	LDA	Stat_2		;get system
+	AND	#Motor_rev	;clear fwd flag
+	ORA	#Motor_actv	;set motor in motion
+	STA	Stat_2		;update system
+	LDA	Stat_3		;get current status
+	ORA	#Motor_off	;turn both motors off
+	AND	#Motor_revs	;move motor in rev dir
 End_rev:
+	STA	Stat_3
+	JMP	Endtask_2		;done
 
 Do_motor:
-;;; page 045 end
-;;; page 046 start XXX
-Byp_motorsS2:
 
-Byp_motorsS3:
+;((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
+; motor speed control
+;;; page 045 end
+;;; page 046 start complete
+;   jmp Byp_jnotorS3
+  
+	LDA	Stat_0		;system
+	AND	#Init_Mspeed	;ck if motor to do speed test
+	BEQ	Byp_motorS3	;only runs on wake up
+	LDA	Stat_0		;system
+	AND	#Init_motor	;ck if motor to do speed test
+	BEQ	Byp_motorS2	;only runs on wake up
+	LDA	Stat_0		;system
+	AND	#Nt_Init_motor	;done
+	STA	Stat_0		;update
+
+	LDA	#00		;reset opto speed counter
+	STA	Mot_opto_cnt	;set it
+	LDA	#Opto_spd_reld	;get timer value for speed test
+	STA	Mot_speed_cnt	;set it
+
+Byp_motorS2:
+
+	LDA	Mot_speed_cnt	;get timer
+	BNE	Byp_motorS3	;do nothing if >0
+
+	LDX	Mot_opto_cnt	;get wheel count during speed test
+	LDA	Motor_speed,X	;get motor on pulse width
+	STA	Mon_len		;on time
+	LDA	#Mpulse_on+1	;max cycle time on+off
+	CLC
+	SBC	Mon_len		;get cmplmnt
+	STA	Moff_len		;
+	BCS	Byp_motorS3	;jump if not neg
+	LDA	#00
+	STA	Moff_len		;
+
+	LDA	Stat_0		;system
+	AND	#NT_Init_Mspeed	;clear motor to do speed test
+	STA	Stat_0		;update
+
+Byp_motorS3:
+
+;))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+
+
+; On power up we preset Mon_len to 11 and Moff_len to 5. This prevents
+; the motor from destroying itself when the batteries are 6.4v.
+; This also gives a timed count on the speed test of -7 difference.
+; so I adjusted the table to compensate for the shift.
+
+
+
+; Compare motor position to see if at destination yet
+
+	LDA	Stat_2		;get direction
+	AND	#Motor_fwd	;set=inc  clr=dec
+	BEQ	Motor_dec		;
+
+;bit was set so motor in inc condition
 
 FCalc_lo:
+	LDA	Motor_lo		;get data
+	CLC			;carry=0
 ;;; page 046 end
-;;; page 047 start XXX
-Motor_dec:
+;;; page 047 start complete
+	SBC	Pot_timeL		;table - current cap time
+	BCC	Motor_killfwd	;jump if result is negative
+	JMP	Endmotor		;wait till there & pulse for speed
+
+; Reverse direction......
+Motor_dec:			; go reverse
+	LDA	Pot_timeL		;destination
+	CLC			;carry= 0
+	SBC	Motor_lo		;table position to seek to
+	BCC	Motor_killrev	;jump if result negative
+	JMP	Endmotor		;wait till there & pulse for speed
 
 Motor_killfwd:
-
+	LDA	Drift_counter	;ck how far we travled
+	TAX			;prep for drift table
+	CLC			;
+	SBC	#20		;ck if less than 20 steps
+	BCC	M_killf2		;jump if less
+	LDA	#Drift_long	;long delay if >10 steps
+	JMP	M_killf3		;go fini
 M_killf2:
-
+	LDA	Drift_table,X	;get brake pulse
+;	LDA	#Drift_short	;short delay if < 10 steps
 M_killf3:
-
+	STA	Drift_rev		;save
+	JMP	Motor_killend	;go shut down motor
+;
 Motor_killrev:
-
+	LDA	Drift_counter	;ck how far we travled
+	TAX			; prep for drift table
+	CLC			;
+	SBC	#20		;ck if less than 20 steps
+	BCC	M_killr2		;jump if less
+	LDA	#Drift_long	;long delay if >10 steps
+	JMP	M_killr3	;go fini
 M_killr2:
-
+	LDA	Drift_table,X	;get brake pulse
+;	LDA	#Drift_short	;short delay if < 10 steps
 M_killr3:
-
+	STA	Drift_fwd		;save
 Motor_killend:
+	LDA	Stat_3		;get current status
+	ORA	#Motor_off	;turn both motors off
+	STA	Stat_3		;update
+	LDA	Stat_2		;get system
+	AND	#Motor_inactv	;clear activ flag
+	STA	Stat_2		;update system
+	LDA	Which_delay	;time   til next read
+	STA	Cycle_timer	;reset it
+	LDA	#00
+	STA	TEMP1		;used   to test motor drift between seeks
+	JMP	Endtask_2		;
+
+; Drift table controls the magnitude of braking pulse applied.
+; If the distance just travled is less than 20 then use that number
+; to point into table and get new brake pulse length.
 
 Drift_table:
+
+;	DB	24,30,32,34,35,38,40,44,48,54,56
+
 ;;; page 047 end
-;;; page 048 start XXX
+;;; page 048 start complete
+;	DB	58,60,60,60,60,60,60,60,60,60,60
+
+;	DB	20,22,24,27,30,32,34,36,38
+;	DB	46,48,50,52,54,56,58,60,60,60,60,60
+
+	DB	25,26,27,28,30,32,34,36,38,42,45
+	DB	48,51,54,57,60,60,60,60,60,60,60
+
+
+;
+; On wake up when the motor moves from position 10 to 134, we
+; time it and increment a counter which is used to access this table
+; and get the motor on pulse value.
+
+
+;   Refer to power up preset pulse width for table pointers
+
 Motor_speed:
 
+	DB	Mpulse_on,Mpulse_on,Mpulse_on
+	DB	Mpulse_on,Mpulse_on,Mpulse_on
+	DB	Mpulse_on,Mpulse_on,Mpulse_on
+	DB	Mpulse_on,Mpulse_on,Mpulse_on
+	DB	Mpulse_on,Mpulse_on,Mpulse_on
+	DB	Mpulse_on,Mpulse_on,Mpulse_on		;f,10
+	DB	Mpulse_on,Mpulse_on,Mpulse_on
+	DB	Mpulse_on,Mpulse_on,Mpulse_on
+	DB	Mpulse_on,Mpulse_on,Mpulse_on-1
+	DB	Mpulse_on-2,Mpulse_on-3,Mpulse_on-4	;1b,1c
+	DB	Mpulse_on-5,Mpulse_on-5,Mpulse_on-6
+	DB	Mpulse_on-7,Mpulse_on-8,Mpulse_on-9
+	DB	Mpulse_on-9,Mpulse_on-9,Mpulse_on-9
+	DB	Mpulse_on-9,Mpulse_on-9,Mpulse_on-9
+	DB	Mpulse_on-9,Mpulse_on-9,Mpulse_on-9
+	DB	Mpulse_on-9,Mpulse_on-9,Mpulse_on-9
+	DB	Mpulse_on-9,Mpulse_on-9,Mpulse_on-9
+	DB	Mpulse_on-9,Mpulse_on-9,Mpulse_on-9
+
+
+
+;
+;
+; This finds the 16 bit adrs of the table and points the motor
+
 Decide_motor:
-
-Dec_mot1:
-
-Dec_mot2:
+	LDX	Which_motor	;offset ptr
+	LDA	Mgroup		;get current group pointer
+	CMP	#03		;is it table group 4
+	BEQ	Dec_mot4		;jump if is
+	CMP	#02		;is it table group 3
+	BEQ	Dec_mot3		;jump if is
+	CMP	#01		;is it table group 2
+	BEQ	Dec_mot2		;jump if is
+Dec_mot1:				;table group 1
+	LDA	Motor_grp1,X	;get lo pointer
+	STA	Motptr_lo		;working buffer
+	INX			;X+1
+	LDA	Motor_grp1,X	;get hi pointer
+	JMP	Dec_mot_end	;go finish load
+Dec_mot2:				;
 ;;; page 048 end
-;;; page 049 start XXX
-
-Dec_mot3:
-
-Dec_mot4:
-
+;;; page 049 start complete
+	LDA	Motor_grp2,X	;get lo pointer
+	STA	Motptr_lo		;working buffer
+	INX			;X+1
+	LDA	Motor_grp2,X	;get hi pointer
+	JMP	Dec_mot_end	;go finish load
+Dec_mot3:				;
+	LDA	Motor_grp3,X	;get lo pointer
+	STA	Motptr_lo		;working buffer
+	INX			;X+l
+	LDA	Motor_grp3,X	;get hi pointer
+	JMP	Dec_mot_end	;go finish load
+Dec_mot4:				;
+	LDA	Motor_grp4,X	;get lo pointer
+	STA	Motptr_lo		;working buffer
+	INX			;X+1
+	LDA	Motor_grp4,X	;get hi pointer
 Dec_mot_end:
-
+	STA	Motptr_hi		;working buffer
+	LDA	Stat_2		;system
+	ORA	#Motor_seek	;flag system
+	STA	Stat_2		;update
+;	LDA	#Motor_led_rst	;get moto led timer reload
+;	STA	Motor_led_timer	;how long the motor IR led stays on
 More_multi_m:
+	JSR	Motor_data	;1st time only get 1st byte (delay)
+	LDA	Motor_lo		;get data
+	STA	Which_delay	;motor delay control
+	RTS			;done
+
+;
+;
+; Get next motor data from table according to indirect pointer.
+
+; NOTE: we are now using DB statments in the motor table
+;       so were back to single byte format.
 
 Motor_data:
-
+	LDX	#00H
+	LDA	(Motptr_lo,X)	;Get the motor data
+	STA	Motor_lo		;lo byte
+	INC	Motptr_lo		;next
+	BNE	Mot_dat2		;jmp in no roll over
+	INC	Motptr_hi		;rolled over so hi +1
 Mot_dat2:
+	RTS
+
+
+; Test motor pulse timer and alternate on & off to keep motor speed
+; constant through battery deterioration.
 
 Endmotor:
+;m	LDA	Motor_pulse	;ck pulse timer
+;m	BNE	Endtask_2		;jump if not done
+;m	LDA	Stat_3		;system
+;m	AND	#Motor_on		;is it an power on pulse
+;m	BNE	Emotor_off	;jump if on pulse (set)
+;m	LDA	Stat_3		;system
+;m	ORA	#Motor_on		; flag  on mode
+;m	STA	Stat_3		;update
+;m	LDA	Mon_len		;get length of on pulse
+;m	STA	Motor_pulse	;set timer
 ;;; page 049 end
-;;; page 050 start XXX
+;;; page 050 start complete
+;mPls_fwd:
+;m	LDA	Stat_2		;get system
+;m	AND	#Motor_fwd	;ck if set = motor fwd (inc)
+;m	BEQ	Pls_rev		;else go reverse
+;m	LDA	Stat_3		;get current status
+;m	ORA	#Motor_off	;turn both motors off
+;m	AND	#Motor_fwds	;move motor in fwd dir
+;m	JMP	Plsend		;go finish port setup
+;mPls_rev:
+;m	LDA	Stat_3		;get current status
+;m	ORA	#Motor_off	;turn both motors off
+;m	AND	#Motor_revs	;move motor in rev dir
+;mPlsend:
+;m	STA	Stat_3
+;m	JMP	Endtask_2		;done
+;mEmotor_off:			;must be on so turn off
+;m	LDA	Stat_3		;system
+;m	AND	#Ntmot_on		;set to power off pulse
+;m	STA	Stat_3		;update
+;m	LDA	Moff_len		;get length of off pulse
+;m	STA	Motor_pulse	;set timer
+;m	LDA	Stat_3		;get current status
+;m	ORA	#Motor_off	;turn both motors off
+;m	STA	Stat_3		;update
 Endtask_2:
+	RTS			;back to Idle rtn
 
-; Start motor/speech from macro table
+;**************************************************************
+;**************************************************************
+;   Start motor/speech from macro table
+
+; Because of conflicts in diagnostic routines, this routine has been
+; changed to a subroutine. All normal sensors jump here, diags call
+; direct.
 
 Start_macro:
+	LDA	#Bored_reld	; reset bored timer
+	STA	Bored_timer	;
+
+	LDA	Macro_Lo		; save for sleepy & IR tests
+	STA	Req_macro_lo	;
+	LDA	Macro_Hi		; save for sleepy & IR tests
+	STA	Req_macro_hi	;
+
+	JSR	Get_macro		;
+	JMP	Idle		; done
 
 Get_macro:
+
+; Motor noise is triggering sound sensor hardware, so this sets the
+; previously sound done flag, and the system will not respond to the
+; sound sensor until the sound trigger line goes low and clears prev done.
+
+	LDA	Stat_3		;system
+	ORA	#Sound_stat	;
+	STA	Stat_3		;set prev dn
+
+;---------------------- end sound flag
 ;;; page 050 end
-;;; page 051 start XXX
+;;; page 051 start complete
+	INC	Age_counter	;rolls over to inc age
+	BNE	Same_age		;jump if no roll over
+
+;__________________________________________________
+
+; AGE INCRMNT uses bit 7 to double age counter
+	LDA	Age		;get bit 7 - set = counter rolled over twice
+	AND	#80h		;get bit 7
+	BNE	Roll_age		;bit 7 set so inc age
+	LDA	Age
+	ORA	#80h		;set bit 7 for next counter roll over
+	STA	Age		;update
+	JMP	Same_age		; done
+
 Roll_age:
+	INC	Age		;just grew up some
+	LDA	Age
+	AND	#07h		;clear bit 7
+	STA	Age
+	CLC
+	SBC	#03		;make sure it isnt > 3 (0-3 age)
+	BCC	Same_age		;jump if <4
+	LDA	#03		;max age
+	STA	Age		;
 
 Same_age:
+;-------------------- end age
 
-Dec_macro1:
 
-Dec_macro2:
+	LDA	Stat_2		;system
+	ORA	#Macro_actv	;flag request
+	STA	Stat_2		;update
+	CLC			;do speech
+	ROL	Macro_Lo		;move hi bit to carry & get 2's offset
+	ROL	Macro_Hi		;move carry into one of four group ptr
 
-Dec_macro3:
+	LDX	Macro_Lo		;offset ptr
+	LDA	Macro_Hi		;get current group pointer
+	CMP	#03		;is it table group 4
+	BEQ	Dec_macro4	;jump if is
+	CMP	#02		;is it table group 3
+	BEQ	Dec_macro3	;jump if is
+	CMP	#01		;is it table group 2
+	BEQ	Dec_macro2	;jump if is
+Dec_macro1:			;table group 1
+	LDA	Macro_grp1,X	;get lo pointer
+	STA	Macro_Lo		;working buffer
+	INX			;X+1
+	LDA	Macro_grp1,X	;get hi pointer
+	JMP	Dec_macro_end	;go finish load
+Dec_macro2:			;
+	LDA	Macro_grp2,X	;get lo pointer
+	STA	Macro_Lo		;working buffer
+	INX			;X+1
+	LDA	Macro_grp2,X	;get hi pointer
+	JMP	Dec_macro_end	;go finish load
+Dec_macro3:			;
+	LDA	Macro_grp3,X	;get lo pointer
+	STA	Macro_Lo		;working buffer
+	INX			;X+1
 ;;; page 051 end
-;;; page 052 start XXX
-Dec_macro4:
-
+;;; page 052 start complete
+	LDA	Macro_grp3,X	;get hi pointer
+	JMP	Dec_macro_end	;go finish load
+Dec_macro4:			;
+	LDA	Macro_grp4,X	;get lo pointer
+	STA	Macro_Lo		;working buffer
+	INX			; X+1
+	LDA	Macro_grp4,X	;get hi pointer
 Dec_macro_end:
+	STA	Macro_Hi		;working buffer
+	RTS			;
 
-Otomah_lo:
-Otomah_hi:
 
-Fortdelay_lo	EQU	#66h
-Fortdelay_hi	EQU	#00h
+;
+;
+;************************************************************
+;************************************************************
+;************************************************************
+
+;
+; This group of speech & misc routines are used for the various game
+; play modes, triggered by the easter egg.
+
+
+
+;************************************************************
+;************************************************************
+;************************************************************
+
+; REMEMBER TO CLEAR GAME ACTIVE STATUS WHEN DONE
+
+; NOTE:   Otomah should have a delay before the word to seperate this game
+;         from the speech generated by the last sensor that triggered
+;         this game.
+
+Otomah_lo	EQU	#54h		;using macro 84 for 1st word
+Otomah_hi	EQU	#00		;hi byte adrs 84 = 054h
+
+Fortdelay_lo	EQU	#66h	;using macro 102 for delay between speech
+Fortdelay_hi	EQU	#00h	;hi byte adrs 102 = 066h
 
 Game_fortune:
+	LDA	Stat_5		;flag used at start of game
+	AND	#temp_gam1	;see if prev done
+	BNE	Gam_fort2		;jump if done
+	LDA	Stat_5		;flag used at start of game
+	ORA	#temp_gam1	;set prev done
+	STA	Stat_5		;update
+
+	LDA	#Otomah_lo	;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	LDA	#Otomah_hi	;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JSR	Get_macro		;go start motor/speech
+	JSR	Notrdy		;Do / get status for speech and motor
+
+	LDA	#GameT_reload	;reset game timer
+	STA	Sensor_timer	;
 
 Gam_fort2:
+	JSR	Test_all_sens	;go check all sensors
 ;;; page 052 end
-;;; page 053 start XXX
+;;; page 053 start complete
+	LDA	Stat_4		;get sensor status
+	AND	#Do_back		;ck if back sw req
+	BNE	Gam_fort4		;jump if requested
+
+	LDA	Stat_4		;get sensor status
+	AND	#Do_invert	;ck if tilt sw req
+	BEQ	Gam_fort3		;jump if not requested
 Gam_fort2a:
+	JSR	Clear_all_gam	;go clear all status, cancle game
+	JMP	End_all_games	;done go say "me done"
 
 Gam_fort3:
+	LDA	Sensor_timer	;ck for no action timeout
+	BEQ	Gam_fort2a	;clear all if timed out
+	JMP	Idle		;wait for switch
 
 Gam_fort4:
+	LDA	Stat_4		;get sensor status
+	AND	#Nt_do_back	;back sw req
+	STA	Stat_4		;clear req
 
+	LDA	#GameT_reload	;reset game timer
+	STA	Sensor_timer	;
 
+	LDA	#Fortdelay_lo	;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	LDA	#Fortdelay_hi	;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JSR	Get_macro		;go start motor/speech
+	JSR	Notrdy		;Do / get  status for speech and motor
+
+	LDA	Stat_1		;get system
+	ORA	#Half_age		;force table 1 or 2 in "Decid_age"
+	STA	Stat_1		;update
+
+	LDA	#80h		;get random/sequential split
+	STA	IN_DAT		;save for random routine
+
+	LDX	#00		;make sure only gives random
+	LDA	#10h		;get number of random selections
+	JSR	Ran_seq		;go decide random/sequential
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;   Acc holds random number 0-F
+
+	JSR	Decid_age		;do age calculation for table entry
+	LDX	TEMP0		;age offset
+	LDA	Fortyes_S1,X	;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	STA	Req_macro_lo	;save for game
+	INX			;
+	LDA	Fortyes_S1,X	;get hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	STA	Req_macro_hi	;save for game
+
+	LDX	#00		;offset
 Fort_Name2:
+	LDA	Ck_Fort_name,X	;ck lo byte
+	CMP	#FFh		;ck for end of table  (note 255 cant execute)
+	BEQ	Fort_Name_dn	;done if is
+	CMP	Macro_Lo		;ck against last speech request
 ;;; page 053 end
-;;; page 054 start XXX
+;;; page 054 start complete
+	BNE	Not_Fort2		;jump if not
+	INX			;to hi byte
+	LDA	Ck_Fort_name,X	;ck hi byte
+	CMP	Macro_Hi		;ck against last speech request
+	BNE	Not_Fort3		;jump if not
+	JMP	Say_Fortname	;speak it
 Not_Fort2:
-
+	INX			;
 Not_Fort3:
+	INX			;
+	JMP	Fort_Name2	;loop til done
 
 Say_Fortname:
+	LDA	Name		;current setting for table offset
+	CLC
+	ROL	A		;2's comp
+	TAX
+	LDA	Name_table,X	;get lo byte
+	STA	Macro_Lo	;	save lo byte of Macro table entry
+	INX			;
+	LDA	Name_table,X	;get hi byte
+	STA	Macro_Hi		; save hi byte of Macro table entry
+	JSR	Get_macro		;go start motor/speech
+	JSR	Notrdy		;Do / get status for speech and motor
+
+	LDA	Req_macro_lo	;recover for game
+	STA	Macro_Lo		;set game speech
+	LDA	Req_macro_hi	;recover for game
+	STA	Macro_Hi		;set game speech
 
 Fort_Name_dn:
+	JMP	Start_macro	;go set group/table pointer for motor & spch
+
+; compare macro to see if we are going to call Furby's name first.
 
 Ck_Fort_name:
+	DW	69
+	DW	77
 
+	DB	FFh,FFh		; FF FF is table terminator
+
+
+;************************************************************
+;
 Game_Rap:
-
+	JMP	Do_rap		;1st time thru
 Grap_2:
-
+	JSR	Simon_timer	;decrement bored timer
+	LDA	Bored_timer	;system elapsed time
+	BEQ	Rap_over		;jump if 0
+	JSR	Test_all_sens	;go check all sensors
+	LDA	Stat_4		;get sensors
+	BEQ	Grap_2		;loop if none
+	AND	#Do_snd		;ck for mic
+	BNE	Do_rap		;any other sensor stops game
 Rap_over:
+	JSR	Clear_all_gam	;go clear all status, cancle games
+	JMP	End_all_games	;done go say "me done"
 ;;; page 054 end
 ;;; page 055 start XXX
 Do_rap:
+	LDA	#00		;clear all sensor flags
+	STA	Stat_4		;
+	LDA	#GameT_reload	;get reload
+	STA	Bored_timer	;reset
+	LDA	#80h		;get random/sequential split
+	STA	IN_DAT		;save for random routine
+	LDX	#00h		;make sure only gives random
+	LDA	#10h		;get number of random selections
+	JSR	Ran_seq		;go get random selection
+	LDA	TEMP1		;get decision
+	AND	#03h		;got 1 of 4 decision
+	CLC
+	ROL	A		;2's offsett
+	TAX
+	LDA	Rapsong,X		;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX
+	LDA	Rapsong,X		;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JSR	Get_macro		;go start motor/speech
+	JSR	Notrdy		;Do / get  status for speech and motor
+	JMP	Grap_2		;loop
+
 
 Rapsong:
+	DW	395		;macro RAP song pointer
+	DW	396		;
+	DW	407		;
+	DW	416		;
 
-HidePeek_lo	EQU	#DBh
-HidePeek_hi	EQU	#01h
+;************************************************************
+;
 
-Hidsklost_lo	EQU	#D8H
-Hidsklost_hi	EQU	#01H
+HidePeek_lo	EQU	#DBh	;using macro 475 for startp "hide me" spch
+HidePeek_hi	EQU	#01h	;hi byte adrs 475 = 1DBh
 
-Hidskwon_lo	EQU	#B7H
-Hidskwon_hi	EQU	#01H
+Hidsklost_lo	EQU	#D8h	;using macro 472 for "nana nana nana
+Hidsklost_hi	EQU	#01h	;hi byte adrs 472 = 1D8h
+
+Hidskwon_lo	EQU	#B7h	;using macro 439 for "whopee
+Hidskwon_hi	EQU	#01h	;hi byte adrs 439 = 1B7h
+
 
 
 Game_hideseek:
+
+	LDA	#80		;set timer for 1 min (80 * .742)
+	STA	HCEL_LO		;use temp ram for timer
+
+	LDA	Name		;current setting for table offset
+	CLC
+	ROL	A		; 2's comp
+	TAX
+	LDA	Name_table,X	;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX			;
+	LDA	Name_table,X	;get hi byte
+	STA	Macro_Hi		; save hi byte of Macro table entry
+	JSR	Get_macro		;go start motor/speech
+	JSR	Notrdy		;Do / get   status for speech and motor
 ;;; page 055 end
 ;;; page 056 start XXX
 Gam_hide2:
@@ -2928,7 +3558,7 @@ Simon_convert:
 Simon_won_tbl:
 ;;; page 063 end
 ;;; page 064 start XXX
-End_allGames:
+End_all_games:
 
 Saygamdn_lo	EQU	#D9h
 Saygamdn_hi	EQU	#01h
@@ -3471,7 +4101,7 @@ Read_loop:
 	STA	Which_motor	;
 	STA	Which_delay	;
 
-	  CLI			;Enable IRQ
+	CLI			;Enable IRQ
 	JSR	Kick_IRQ	;wait for interrupt to restart
 	JSR	TI_reset		;go init TI  (uses 'Cycle_timer')
 ;*******************************************************************************
@@ -4089,8 +4719,8 @@ Intt_done:			;general return
 Intt_false:
 	LDA	#00H		;clear all intts first
 	STA	Interrupts	;
-	  LDA	  #Intt_dflt	;get default for interrupt reg
-	  STA	  Interrupts	;set reg & clear intt flag
+	LDA	#Intt_dflt	;get default for interrupt reg
+	STA	Interrupts	;set reg & clear intt flag
 
 	PLP			;recover CPU
 ;;; page 104 end
@@ -4255,7 +4885,7 @@ Wtest:
 
 Get_group0:
 	LDA	#00		;set bank
-	  STA	  Bank_ptr	;Bank number
+	STA	Bank_ptr	;Bank number
 	CLC			;clear carry
 	LDA	Which_word	;get word
 	ROL	A		;2's offsett
@@ -4275,7 +4905,7 @@ Get_group1:
 ;;; page 107 end
 ;;; page 108 start complete
 	LDA	#01		;set bank
-	  STA	  Bank_ptr	;Bank number
+	STA	Bank_ptr	;Bank number
 	CLC
 	LDA	Which_word	;get word
 	SBC	#12		;1st 12 in word_group0
@@ -4322,11 +4952,11 @@ Say_end:
 ; ******** start of chg for 3 - #FFh xmits ti TI
 
 Do_spch:
-	  LDA	  Bank_ptr	;Bank number
-	  STA	  Bank		;set it
+	LDA	Bank_ptr	;Bank number
+	STA	Bank		;set it
 
-	  LDX	  #00H
-	  LDA	  (Word_lo,X)	;Get the speech data
+	LDX	#00H
+	LDA	(Word_lo,X)	;Get the speech data
 	CMP	#FFH		;is it end of word
 	BNE	Clr_word_end	;jump if not end
 
