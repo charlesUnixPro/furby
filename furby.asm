@@ -40,29 +40,13 @@ Spch_more equ fe18h
 ;
 ; pg 105-108     TI sound chip communication
 ;
-;;; page 000 start complete; cover page 
-;         TITLE PAGE
-;
-;       INTERACTIVE TOY
-;   (FURBY.ASM - Version 25)
-;
-;    INVENTOR: Dave Hamptom
-;
-;
-; Attorney Docket No. 64799
-; FITCH, EVEN, TABIN & FLANNERY
-; Suite 900
-; 135 South LaaSalle Street
-; Chicago, Illinois  60603-4277
-; Telephone (312) 372-7842
-;;; page 000 end
 ;;; page 001 start complete
 ;*******************************************************************************
 ;
 ;	SPC81A Source Code   (Version 25)
 ;
 ;
-;	Written by: Dave Hampton / W???? Schulz
+;	Written by: Dave Hampton / Wayne Schulz
 ;
 ;	Date:       July 30, 1998
 ;
