@@ -11,12 +11,14 @@ The scan appears to contain the contents of several files:
 
       Untitled file, presumable something like "Furby.asm".
 
-      Not that the file is incomplete, the last page ends mid-routine.
+      Note that the file is incomplete; the last page ends mid-routine.
 
 
    pages 109-110:
  
       "Wake2.asm"
+
+      Note that the file is incomplete; the last page ends mid-routine.
 
       Referenced as an include file on page 19 of Furby.ASM
 
