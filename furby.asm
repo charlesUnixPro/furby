@@ -9,11 +9,12 @@ Word_active equ   15h
 Clr_word_end equ fe16h
 Set_end equ fe17h
 Spch_more equ fe18h
-
+GBYTE	equ fe19h
 
 ;;; cac I am not sure how Furby 27 gets included. XXX
 
-  Include Furby27.inc
+;  Include Furby27.inc
+
 
 ;Voice_table equ ff00h
 ;Name_table equ ff01h
@@ -3243,7 +3244,7 @@ Rap_over:
 	JSR	Clear_all_gam	;go clear all status, cancle games
 	JMP	End_all_games	;done go say "me done"
 ;;; page 054 end
-;;; page 055 start XXX
+;;; page 055 start complete
 Do_rap:
 	LDA	#00		;clear all sensor flags
 	STA	Stat_4		;
@@ -3306,46 +3307,190 @@ Game_hideseek:
 	JSR	Get_macro		;go start motor/speech
 	JSR	Notrdy		;Do / get   status for speech and motor
 ;;; page 055 end
-;;; page 056 start XXX
+;;; page 056 start complete
+	LDA	#HidePeek_lo	;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	LDA	#HidePeek_hi	;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JSR	Get_macro		; go start motor/speech
+	JSR	Notrdy		;Do / get   status for speech and motor
+
 Gam_hide2:
+	JSR	HideS_timer	;go dec bored timer without Idle
+
+	JSR	Test_all_sens	;go check all sensors
+	LDA	Stat_4		;get all switches
+	AND	#Do_invert	;ck if inverted
+	BEQ	Gam_hide2a	;jump if not inverted
+;	JMP	Gam_hide9		;abort game and call game lost speech
+	JSR	Clear_all_gam	;go clear all status, cancle games
+	JMP	End_all_games	;done go say "me done"
 
 Gam_hide2a:
+	LDA	HCEL_LO		;ck for no action timeout
+	BNE	Gam_hide2		;wait till done to start game
+
+	LDA	#00		;clear all sensor flags
+	STA	Stat_4
+
+	LDA	#242		;set timer for 3 min (242 * .742)
+	STA	HCEL_LO		;reset
 
 Gam_hide4:
+	LDA	#80h		;get random/sequential split
+	STA	IN_DAT		;save for random routine
+	LDX	#00		;make sure only gives random
+	LDA	#10h		;get number of random selections (0-0f)
+	JSR	Ran_seq		;go decide random
+	AND	#0Fh		;and nnot >16
+	TAX
+	LDA	Hide_time,X	;get random timer for speech
+	STA	Sensor_timer	;
 
 Gam_hide5:
+	JSR	Test_all_sens	;go check all sensors
+	LDA	Stat_4		;get sensor status
+	AND	#Do_tilt		;ck if tilt sw req
+	BNE	Gam_hide8		;jump if requested
+
+	JSR	HideS_timer	;go dec bored timer & sensor_timer
+	LDA	HCEL_LO		;get elapsed
+	BEQ	Gam_hide9		;game over
+
+	LDA	Sensor_timer	;get random speech timer
+	BNE	Gam_hide5		;loop till done
+
+; GO SAY RANDOM WORDS TO HELP FIND HIM
+
+	LDA	#80h		;get random/sequential split
+	STA	IN_DAT		;save for random routine
+	LDX	#00h		;make sure only gives random
+	LDA	#10h		;get number of random selections
+	JSR	Ran_seq		;go get random selection
+	LDA	TEMP1		;get decision
 ;;; page 056 end
-;;; page 057 start XXX
-Gam_hide8:
+;;; page 057 start complete
+	CLC
+	ROL	A		;2's offsett
+	TAX
+	LDA	Hideseek,X	;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX
+	LDA	Hideseek,X	;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JSR	Get_macro		;go start motor/speech
+	JSR	Notrdy		;Do / get  status for speech and motor
+	JMP	Gam_hide4
 
-Gam_hide9:
+Gam_hide8:	;GAME WON SPEECH
 
+	JSR	Clear_all_gam	;go clear all status, cancel game
+
+	LDA	#Hidskwon_lo	;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	LDA	#Hidskwon_hi	;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JMP	Start_macro	;go set group/table pointer for motor & spch
+
+Gam_hide9:	;GAME LOST SPEECH
+
+	JSR	Clear_all_gam	;go clear all status, cancel game
+	LDA	#03		;number of times to call "nana"
+	STA	HCEL_HI
 Gam_hide9a:
+	LDA	#Hidsklost_lo	;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	LDA	#Hidsklost_hi	;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JSR	Get_macro		;go start motor/speech
+	JSR	Notrdy		;Do / get   status for speech and motor
+	DEC	HCEL_HI		;loop
+	BNE	Gam_hide9a	;
+	JMP	Idle		;done
 
 HideS_timer:
-
+	LDA	Milisec_flag	;if >0 then 742 mili seconds have passed
+	BEQ	HideS_tdn		;bypass if 0
+	LDA	#00		;clear it
+	STA	Milisec_flag	;reset
+	LDA	HCEL_LO		;get current timer * 742mSec sec
+	BEQ	HideS_t2		;do nothing if 0
+	DEC	HCEL_LO		;-1
 HideS_t2:
-
+	LDA	Sensor_timer	;get current timer * 742mSec sec
+	BEQ	HideS_tdn		;do nothing if 0
+	DEC	Sensor_timer	;-1
 HideS_tdn:
+	RTS			;
 
-Hide_time:
+
+Hide_time:	;for random time between calls when hiding
+	DB	6	;5 sec  (x * .742)
+	DB	7
+	DB	8
+	DB	9
+	DB	10
 ;;; page 057 end
-;;; page 058 start XXX
-Hide_seek:
+;;; page 058 start complete
+	DB	11
+	DB	12
+	DB	13
+	DB	14
+	DB	15
+	DB	16
+	DB	17
+	DB	18
+	DB	19
+	DB	20	;15 sec
+	DB	10
 
-; Furby - Says
 
-Simondelay_lo	EQU	#66h
-Simondelay_hi	EQU	#00
 
-Listen_me_lo	EQU	DAh
-Listen_me_hi	EQU	01h
+Hideseek:		;table of sound when Furby is hiding & waiting to be found
+	DW	437	;
+	DW	438
+	DW	95
+	DW	96
+	DW	97
+	DW	451
+	DW	452
+	DW	437
+	DW	437
+	DW	438
+	DW	95
+	DW	96
+	DW	97
+	DW	451
+	DW	452
+	DW	438
 
-Simon_frnt_lo	EQU	#AEh
-Simon_frnt_hi	EQU	#01h
 
-Simon_back_lo	EQU	#AFh
-Simon_back_hi	EQU	#01h
+;************************************************************
+;
+; Furby - Says      ;;;;
+
+; Four byte of ram allocated for game and 5th byte is game counter.
+; On start, get 4 random numbers and set the game counter to 4 sequences.
+; Furby plays the 4 sounds and waits for the sensors to respond. If its
+; wrong, then start over at beginning and if it is right then say whoppee
+; and increment to 5 sounds,,,,,, until all 16. If 16 correct then get
+; 4 new random numbers and continue with 16 sequences.
+; The invert switch bails out of the game.
+
+
+
+
+Simondelay_lo	EQU	#66h	;using macro 102 for delay between speech
+Simondelay_hi	EQU	#00h	;hi byte adrs 102 = 066h
+
+Listen_me_lo	EQU	DAh	;on start up he say “Listen Me"
+Listen_me_hi	EQU	01h	;macro 474 = 1DAh
+
+Simon_frnt_lo	EQU	#AEh	;using macro 430 for simon chooses "tickle"
+Simon_frnt_hi	EQU	#01h	;hi byte adrs 430 = 1AEh
+
+Simon_back_lo	EQU	#AFh	;using macro 431 for simon chooses  "pet
+Simon_back_hi	EQU	#01h	;hi byte adrs 431  = 1AFh
 ;;; page 058 end
 ;;; page 059 start complete
 Simon_snd_lo	EQU	#B0h	;using macro 432 for simon chooses "sound
@@ -3532,175 +3677,874 @@ Simon_lost:
 	LDA	#Simonlost_lo	;get macro lo byte
 ;;; page 061 end
 ;;; page 062 start complete
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	LDA	#Simonlost_hi	;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JSR	Get_macro	;go start motor/speech
+	JSR	Notrdy		; Do / get status for speech and motor
+	JMP	Game_simon	;start at beginning
+
 Simon_won:
+	LDA	HCEL_LO		;game number (how many steps)
+	CLC
+	ROL	A		;2's offsett for speech win table
+	TAX			;
+	LDA	Simon_won_tbl,X	;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX			;
+	LDA	Simon_won_tbl,X	;get hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JSR	Get_macro		;go start motor/speech
+	JSR	Notrdy		;Do / get status for speech and motor
+	RTS
+
+
 
 Rotate_play:
+	ROR	Bored_count	;shfl to carry
+	ROR	Task_ptr		;carry & shfl to carry
+	ROR	BIT_CT		;carry & shfl to   carry
+	ROR	HCEL_HI		;carry & shfl to   carry throw away lo bit
+	ROR	Bored_count	;shfl to carry
+	ROR	Task_ptr		;carry & shfl to carry
+	ROR	BIT_CT		;carry & shfl to carry
+	ROR	HCEL_HI		;carry & shfl to carry throw away lo bit
+	RTS			;
 
 Recover_play:
-
+	LDA	TEMP5		;recover random data
+	STA	HCEL_HI
+	LDA	Temp_ID2
+	STA	BIT_CT
+	LDA	Temp_ID
+	STA	Task_ptr
+	LDA	Learn_temp
+	STA	Bored_count
+	RTS			;
+;
 Simon_over:
-
+	JSR	Clear_all_gam	;go clear all status, cancel game
+	LDA	#00		;
+	STA	Task_ptr		;reset for normal use
+	JMP	End_all_games	;done go say "me done"
+;
 Simon_sensor:
+	AND	#03h	;get senosr
+	CLC
+	ROL	A		;2s offset
+	TAX			;offset
+	LDA	Psimon_table,X	;
+	STA	Macro_Lo		;
+	INX			;
+	LDA	Psimon_table,X	;
+	STA	Macro_Hi		;save hi byte of Macro table entry
 ;;; page 062 end
-;;; page 063 start XXX
+;;; page 063 start complete
+	JSR	Get_macro	;go start motor/speech
+	JSR	Notrdy	;Do / get  status for speech and motor
+	RTS			;
+;
 Simon_delay:
-
+	LDA	#Simondelay_lo	;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	LDA	#Simondelay_hi	;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JSR	Get_macro		;go start motor/speech
+	JSR	Notrdy		;Do / get  status for speech and motor
+	RTS			;
+;
 Simon_random:
-
+	JSR	Random		;get random number (0-255)
+	STA	TEMP5		;   "
+	STA	HCEL_HI
+	JSR	Random		;get random number (0-255)
+	STA	Temp_ID2		;   "
+	STA	BIT_CT
+	JSR	Random		;get random number (0-255)
+	STA	Temp_ID		;   "
+	STA	Task_ptr
+	JSR	Random		;get random number        (0-255)
+	STA	Learn_temp	;   "
+	STA	Bored_count
+	RTS
+;
 Simon_timer:
+	LDA	Milisec_flag	;if >0 then 742 mili seconds have passed
+	BEQ	Simon_tdn		;bypass if 0
+	LDA	#00		;clear it
+	STA	Milisec_flag	;reset
 
+	LDA	Bored_timer	;get current timer * 742mSec sec
+	BEQ	Simon_tdn		;do nothing if 0
+	DEC	Bored_timer	;-1
 Simon_tdn:
-
+	RTS			;
+;
 Psimon_table:
+	DW	430	;front switch ( 00 )
+	DW	431	;back switch  ( 01 )
+	DW	433	;sound sensor ( 11 ) (lt & snd swaped in table)
+	DW	432	;light sensor ( 10 )
+;
+Simon_convert:	;converts game   table to sensor table
+	DB	08h	;front sw
+	DB	10h	;back sw
+	DB	04h	;light
+	DB	01h	;sound
+;
+Simon_won_tbl:		;for each game won there is a macro (or re-use them)
+	DW	72	; 0 (not used,,,, place holder)
+	DW	72	; 1 (not used,,,, place holder)
+	DW	72	; 2 (not used,,,, place holder)
+	DW	72	; 3 (not used,,,, place holder)
 
-Simon_convert:
-
-Simon_won_tbl:
+	DW	72	; 4 (1st game has 4 sensors, each game adds one)
+	DW	72	;  5
 ;;; page 063 end
 ;;; page 064 start XXX
-End_all_games:
+	DW	72	; 6
+	DW	72	; 7
+	DW	380	; 8
+	DW	380	; 9
+	DW	380	; 10
+	DW	380	; 11
+	DW	471	; 12
+	DW	471	; 13
+	DW	471	; 14
+	DW	471	; 15
+	DW	439	; 16
 
-Saygamdn_lo	EQU	#D9h
-Saygamdn_hi	EQU	#01h
 
-Burpsnd_lo	EQU	#D6h
-Bursnd_hi	EQU	#01h
+;
+
+End_all_games:	;when any game ends, they jump here and say done
+
+Saygamdn_lo	EQU	#D9h	;using macro 473 for game over speech
+Saygamdn_hi	EQU	#01h	;
+
+
+
+	LDA	#Bored_reld	;reset bored timer
+	STA	Bored_timer	;
+
+	LDA	#Saygamdn_lo	;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	LDA	#Saygamdn_hi	;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JMP	Start_macro	;go set group/table pointer for motor & spch
+
+;************************************************************
+
+;Burp attack egg
+
+Burpsnd_lo	EQU	#D6h	;using macro 470 for user feed back
+Burpsnd_hi	EQU	#01h	;
+
+
 
 Game_Burp:
 
+	JSR	Clear_all_gam
+
+	LDA	#Bored_reld	;reset bored timer
+	STA	Bored_timer	;
+
+	LDA	#Burpsnd_lo	;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	LDA	#Burpsnd_hi	;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JMP	Start_macro	;go set group/table pointer for motor & spch
+
+
+
+
+
+
+;
+;************************************************************
+
+
+;easter egg says NAME
+
 Game_name:
 ;;; page 064 end
-;;; page 065 start XXX
-Twinllsnd_lo	EQU	#D5h
-Twinklsnd_hi	EQU	#01h
+;;; page 065 start complete
+	JSR	Clear_all_gam
 
-Sleep_lo	EQU	#A6h
-Sleep_hi	EQU	#00h
+	LDA	#Bored_reld	;reset bored timer
+	STA	Bored_timer	;
+
+	LDA	Name		;current setting for table offset
+	CLC
+	ROL	A		; 2's comp
+	TAX
+	LDA	Name_table,X	;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX			;
+	LDA	Name_table,X	;get hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JMP	Start_macro	;go set group/table pointer for motor & spch
+;
+;************************************************************
+
+;Twinkle song egg
+
+; When song is complete, if both front and back switches are pressed
+; we goto deep sleep. That means only the invert can wake us up, not
+; the invert switch.
+
+
+
+Twinklsnd_lo	EQU	#D5h	;using macro 469
+Twinklsnd_hi	EQU	#01h	;
+
+Sleep_lo	EQU	#A6h	;using macro 166  (before going to sleep)
+Sleep_hi	EQU	#00h	;
 
 Game_twinkle:
 
+	JSR	Clear_all_gam
+	LDA	#03		;song counter
+	STA	HCEL_LO		;set
 Gtwnk:
-;;; page 065 end
-;;; page 066 start XXX
-Start_sleep:
+	DEC	HCEL_LO		;-1
+	LDA	Stat_2		;Get system clear done flags
+	AND	#Not_tch_ft	;clear previously inverted flag
+	AND	#Not_tch_bk	;clear previously inverted flag
+	STA	Stat_2		;update
 
-Roostersnd_lo	EQU	#D4h
-Roostersnd_hi	EQU	#01h
+	LDA	#Bored_reld	; reset bored timer
+	STA	Bored_timer	;
+
+	LDA	#Twinklsnd_lo	;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	LDA	#Twinklsnd_hi	;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JSR	Get_macro		;go start motor/speech
+	JSR	Notrdy		;Do / get  status for speech and motor
+	JSR	Test_all_sens	;get status
+	JSR	Test_all_sens	;get status 2nd time for debounce
+	LDA	Stat_4		;switch status
+	AND	#18h		;isolate front and back switches
+	CMP	#18h		;
+	BEQ	Start_sleep 	;if both switches pressed, goto sleep
+	LDA	HCEL_LO		;get song loop counter
+	BNE	Gtwnk		;loop
+;;; page 065 end
+;;; page 066 start complete
+	JMP	Idle		;not so egg complete
+
+Start_sleep:
+	LDA	#Sleep_lo		;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	LDA	#Sleep_hi		; get macro hi byte
+	STA	Macro_Hi		; save hi byte of Macro table entry
+	JSR	Get_macro		; go start motor/speech
+	JSR	Notrdy		;Do / get  status for speech and motor
+	LDA	#11h		;set deep sleep mode
+	STA	Deep_sleep	l
+	JMP	GoToSleep		;nity-night
+;
+;************************************************************
+
+;Rooster loves you  egg
+
+Roostersnd_lo	EQU	#D4h	;using macro 468
+Roostersnd_hi	EQU	#01h	;
+
 
 Game_rooster:
 
+	JSR	Clear_all_gam
+
+	LDA	#Bored_reld	;reset bored timer
+	STA	Bored_timer	;
+
+	LDA	#Roostersnd_lo	;get macro lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	LDA	#Roostersnd_hi	;get macro hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JMP	Start_macro	;go set group/table pointer for motor & spch
+
+;************************************************************
+;
+
+; If a game requires sensor input without triggering the normal
+; sensor cycle for speech, then this rtn will check all sensors for
+; change and the calling game can check for the appropriate trigger
+; DO NOT USE I.R. SENSOR SINCE ITS RAM LOCATIONS ARE USED IN GAMES
+
 Test_all_sens:
+	JSR	Get_back		;
+	JSR	Get_Tilt		;
+	JSR	Get_invert	;
+	JSR	Get_front		;
+	JSR	Get_light		;
+	JSR	Get_sound		;
+	JSR	Get_feed		;
+	RTS			;back to game
+
+
+
+
+;************************************************************
+;************************************************************
+;************************************************************
+
+;***** Side wall switch triggers when ball falls off center and I/O goes hi.
+
 ;;; page 066 end
-;;; page 067 start XXX
-CK_tilt:
+;;; page 067 start complete
+CK_tilt:				;tilt sensor
+	JSR	Get_Tilt		;go ck for sensor trigger
+	BCS	Normal_tilt	;go fini normal spch/motor table
+	JMP	Idle		;no request
 
-Get_Tilt:
+Get_Tilt:				;this is the subroutine entry point.
+	LDA	Port_D		;get I/O
+	AND	#Ball_side	;ck if we tilted on side
+	BNE	Do_bside		;jump if hi
 
+	LDA	Stat_2		;Get system
+	AND	#Not_bside	;clear previously on side flag
+	STA	Stat_2		;update
 Side_out:
+	CLC			;clear indicates no request
+	RTS			;
 
 Do_bside:
+	LDA	Stat_2		;system
+	AND	#Bside_dn		;ck if previously done
+	BNE	Side_out		;jump if was
+	LDA	Stat_2		;get system
+	ORA	#Bside_dn		;flag set ,only execute once
+	STA	Stat_2		;update system
 
-Normal_tilt:
+	LDA	Stat_4		;game mode status
+	ORA	#Do_tilt		;flag sensor is active
+	STA	Stat_4		;update
+	SEC			; carry set indicates sensor is triggered
+	RTS			;
 
+Normal_tilt:	;Idle rtn jumps here to complete speech/motor table
+
+
+;;;;;;; 	also for testing, when tilt is triggered, it resets all
+;         easter egg routines to allow easy entry of eggs.
+
+
+	JSR	Clear_all_gam	;
+
+
+;************************************************************
+
+	JSR	Life		;go tweek health/hungry counters
+	BCS	More_tilt		;if clear then do sensor else bail
+	JMP	Idle		;done
 More_tilt:
-;;; page 067 end
-;;; page 068 start XXX
-Tilt_reset:
 
-Tile_side:
+
+;************************************************************
+
+	LDA	#Tilt_split	;get random/sequential split
+	STA	IN_DAT		;save for random routine
+
+	LDX	#Seq_tilt		;get how many sequential selections
+	LDA	#Ran_tilt		;get number of random elections
+	JSR	Ran_seq		;go decide random/sequential
+;;; page 067 end
+;;; page 068 start complete
+	LDX	Sensor_timer	;get current for training subroutine
+
+	BCS	Tilt_ran		;Random mode when carry SET
+
+	LDA	Sensor_timer	;ck if timed out since last action
+	BEQ	Tilt_reset	;yep
+
+	LDA	Tilt_count	;save current
+	STA	BIT_CT		;temp store
+
+	INC	Tilt_count	;if not then next table entry
+	LDA	Tilt_count	;get
+	CLC
+	SBC	#Seq_tilt-1	;ck if > assignment
+	BCC	Tilt_side		;jump if <
+	LDA	#Seq_tilt-1	;dont inc off end
+	STA	Tilt_count	;
+	JMP	Tilt_side		;do it
+Tilt_reset:
+	LDA	#00		;reset to 1st entry of sequential
+	STA	BIT_CT		;temp store
+	STA	Tilt_count	;
+Tilt_side:
+	LDA	#Global_time	;get timer reset value
+	STA	Sensor_timer	;reset it
+	LDA	BIT_CT		;Acc holds value for subroutine
 
 Tilt_ran:
+	STA	IN_DAT		;save decision
+	LDA	#Tilt_ID		;which ram location for learned word count (offset)
+	JSR	Start_learn	;go record training info
+	LDA	IN_DAT		;get decision
 
-Ck_invert:
+	JSR	Decid_age		;do age calculation for table entry
+	LDX	TEMP0		;age offset
+	LDA	Tilt_S1,X		;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX			;
+	LDA	Tilt_S1,X		;get hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JMP	Start_macro	;go set group/table pointer for motor & spch
 
-Get_invert:
+;
+;
+;************************************************************
+;************************************************************
+;************************************************************
+;
+;
+;
+; ***** Inverted ball switch triggers when ball touches top and I/O goes hi.
+
+Ck_invert:	; upside down sense
+
+	JSR	Get_invert	;go ck for sensor trigger
+	BCS	Normal_invert	;go fini normal spch/motor table
+	JMP	Idle	;no request
+
+Get_invert:     ;this is    the subroutine entry point.
 ;;; page 068 end
-;;; page 069 start XXX
+;;; page 069 start complete
+	LDA	Port_D		;get I/O
+	AND	#Ball_invert	;ck if we upside down
+
+	BNE	Do_binvrt		;jump if inverted (hi)
+
+	LDA	Stat_2		;Get system
+	AND	#Not_binvrt	;clear previously inverted flag
+	STA	Stat_2	;update
 Invrt_out:
+	CLC			;clear carry indicates no sensor change
+	RTS			;
 
 Do_binvrt:
+	LDA	Stat_2		;get system
+	AND	#Binvrt_dn	;ck if prev done
+	BNE	Invrt_out		;jump if was
+	LDA	Stat_2		;get system
+	ORA	#Binvrt_dn	;flag set ,only execute once
+	STA	Stat_2		;update system
+
+	LDA	Stat_4		;game mode status
+	ORA	#Do_invert	;flag sensor is active
+	STA	Stat_4		;update
+
+	SEC			;set indicates sensor is triggered
+	RTS			;
 
 Normal_invert:
 
-More_invert:
-;;; page 069 end
-;;; page 070 start XXX
-Invrt_reset:
 
+;************************************************************
+
+	JSR	Life		;go tweek health/hungry counters
+	BCS	More_invert	;if clear then do sensor else bail
+	JMP	Idle		;done
+More_invert:
+
+;************************************************************
+
+
+	LDA	#Invert_split	;get random/sequential split
+	STA	IN_DAT		;save for random routine
+
+	LDX	#Seq_invert	;get how many sequential selections
+	LDA	#Ran_invert	;get number of random elections
+	JSR	Ran_seq		;go decide random/sequential
+
+
+	LDX	Sensor_timer	;get current for training subroutine
+
+	BCS	Invrt_rnd		;Random mode when carry SET
+
+	LDA	Sensor_timer	;ck if timed out since last action
+	BEQ	Invrt_reset	;yep
+
+	LDA	Invrt_count	;save current
+	STA	BIT_CT		;temp store
+
+	INC	Invrt_count	;if not then next table entry
+	LDA	Invrt_count	;get
+;;; page 069 end
+;;; page 070 start complete
+	CLC
+	SBC	#Seq_invert-1	;ck if > assignment
+	BCC	Invrt_set		;jump if <
+	LDA	#Seq_invert-1	;dont inc off end
+	STA	Invrt_count	;
+	JMP	Invrt_set		;do it
+Invrt_reset:
+	LDA	#00		;reset     to 1st entry of sequential
+	STA	BIT_CT		;temp store
+	STA	Invrt_count	;
 Invrt_set:
+	LDA	#Global_time	;get timer reset value
+	STA	Sensor_timer	;reset it
+	LDA	BIT_CT		;speech to call
 
 Invrt_rnd:
 
-Ck_back:
+	STA	IN_DAT		;save decision
+	LDA	#Invert_ID	;which ram location for learned word count (offset)
+	JSR	Start_learn	;go record training info
+	LDA	IN_DAT		;get back word to speak
 
-Get_back:
+	JSR	Decid_age		;do age calculation for table entry
+	LDX	TEMP0		;age offset
+	LDA	Invrt_S1,X	;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX			;
+	LDA	Invrt_S1,X	;get hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JMP	Start_macro 	;go set group/table pointer for motor & speh
 
+;
+;
+;************************************************************
+;************************************************************
+;************************************************************
+;************************************************************
+;
+Ck_back:		;Back touch sensor
+
+	JSR	Get_back		;go ck for sensor trigger
+	BCS	Normal_back	;go fini normal spch/motor table
+	JMP	Idle		;no request
+
+Get_back:	;this is the subroutine entry point.
+
+	LDA	Port_C		;get I/O
+	AND	#Touch_bck	;ck if Kirby's back is rubbed
+	BEQ	Do_tch_bk		;jump if lo
+	LDA	Stat_2		;Get system
+	AND	#Not_tch_bk	;clear previously inverted flag
+	STA	Stat_2		;update
 Tch1_out:
+	CLC			;clear carry for no sensor request
+	RTS			;
 
 Do_tch_bk:
+	LDA	Stat_2		;get system
+	AND	#Tchbk_dn		;ck if prev done
+	BNE	Tch1_out		;jump if was
 ;;; page 070 end
-;;; page 071 start XXX
-Normal_back:
+;;; page 071 start complete
+	LDA	Stat_2		;get system
+	ORA	#Tchbk_dn		;flag set ,only execute once
+	STA	Stat_2		;update system
 
+	LDA	Stat_4		;game mode status
+	ORA	#Do_back		;flag sensor is active
+	STA	Stat_4		;update
+	SEC			;set indicates sensor is triggered
+	RTS			;
+
+Normal_back:	;enter here to complere sensor speech/motor
+
+;************************************************************
+
+	JSR	Life	; go tweek health/hungry counters
+	BCS	More_back	;if clear then do sensor else bail
+	JMP	Idle	;done
 More_back:
 
-Back_reset:
+;************************************************************
 
+
+	LDA	#Back_split	;get random/sequential split
+	STA	IN_DAT		;save for random routine
+
+	LDX	#Seq_back		;get how many sequential selections
+	LDA	#Ran_back		;get number of random slections
+	JSR	Ran_seq		;go decide random/sequential
+
+	LDX	Sensor_timer	;get current for training subroutine
+
+	BCS	Back_rnd		;Random mode when carry SET
+
+	LDA	Sensor_timer	;ck if timed out since last action
+	BEQ	Back_reset	;yep
+
+	LDA	Tchbck_count	;save current
+	STA	BIT_CT		;temp store
+
+	INC	Tchbck_count	;if not then next   table entry
+	LDA	Tchbck_count	;get
+	CLC
+	SBC	#Seq_back-1	;ck if > assignment
+	BCC	Back_set		;jump if <
+	LDA	#Seq_back-1	;dont inc off end
+	STA	Tchbck_count	;
+	JMP	Back_set		;do it
+Back_reset:
+	LDA	#00		;reset to 1st entry of sequential
+	STA	BIT_CT		;temp store
+	STA	Tchbck_count	;
 Back_set:
+	LDA	#Global_time	;get timer reset value
+	STA	Sensor_timer	;reset it
+	LDA	BIT_CT		;get current pointer to tables
 
 Back_rnd:
+
+	STA	IN_DAT		;save decision
+	LDA	#Back_ID		;which ram location for learned word count (offset)
 ;;; page 071 end
-;;; page 072 start XXX
+;;; page 072 start complete
+	JSR	Start_learn	;go record training info
+	LDA	IN_DAT		;get back word to speak
+
+	JSR	Decid_age		;do age calculation for table entry
+	LDX	TEMP0		;age offset
+	LDA	Tback_S1,X	;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX			;
+	LDA	Tback_S1,X	;got hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JMP	Start_macro	;go set group/table pointer for motor & spch
+;
+;
+;************************************************************
+;************************************************************
+;************************************************************
+;************************************************************
+;
+; The IR routine turns interrupts off for 100 Msec, which stops the
+; timing chain (multiplies time by 100). This front end leaves
+; interrupts on and sits in a loop for 5 msec to determine if I.R. is
+; active and if so, executes normal I.R. routine, else exits.
+
+; ********* start Tracker
+
+
+;The way to include the IR program, I list as the following:
+;It shows the program prargraph from Ck_IR: to Ck_front:
+;of couse. It also attach the IR.asm file
+;the IR.asm file I just make a little bit change, to make they work at
+;any system clock assume by constant SystemClock:
+;please advise..  :>
+
 Ck_IR:
-
+	LDA	Last_IR		;timer stops IR from hearing own IR xmit
+	BEQ	CKIR_S		;jump if timer 0
+	JMP	Idle		;abort if >0
 CKIR_S:
-
+	LDA	#FFh		;set loop timer
+	STA	TEMP1		;
+	LDA	#10h		;set gross timer
+	STA	TEMP2		;
 IR_req:
+	LDA	Port_B		;ck if IR signal active (hi)
+	AND	#IR_IN		;get port pin
+	BNE	Got_IR		;go do input if active
+	LDA	Port_B		;ck if IR signal active (hi)
+	AND	#IR_IN		;get port pin
+	BNE	Got_IR		;go do input if active
+	DEC	TEMP1		;inside loop
+	BNE	IR_req		;
+	LDA	#FFh		;reset loop timer.
+	STA	TEMP1		;
+	DEC	TEMP2		;outside loop
+	BNE	IR_req		;loop thru
+	JMP	Idle		;no activity found
 
 Got_IR:
+	LDA	#05		;number of times   to ck for IR reception
 ;;; page 072 end
-;;; page 073 start XXX
+;;; page 073 start complete
+	STA	TEMP4		;
 Got_IR2:
-
+	JSR	D_IR_test		;used as a subroutine for diags
+	BCS	New_IR		;jump if found data
+	DEC	TEMP4		;
+	BNE	Got_IR2		;loop
+	JMP	Idle		;bail out if not
 New_IR:
+	JMP	Normal_IR
+
+;**************************
+; Begin Koball's code
+;**************************
 
 D_IR_test:
+	SEI			;;Tracker
+	JSR	GBYTE		;;Tracker     First time to read
+	LDA	#Intt_dflt	;Initialize timers, etc.
+;;Tracker
+	STA	Interrupts	;load reg
+;;Tracker
+	LDA	IN_DAT		;;load result to ACC
+	CLI			;;Tracker
+
+	RTS
 
 Normal_IR:
+; There are 4 I.R. table arranged as all other tables, one for each age.
+; But here we get a random number which determines which one of the
+; four tables we point to and the actual number received is the one of
+; sixteen selection.
+
+
+	LDA	IN_DAT		;;Tracker add
+	AND	#0Fh		;kill hi nibble (compliment of lo nibble)
+	STA	IN_DAT		; save
+
+	CMP	#08		;test for special sneeze command
+	BNE	No_sneeze		;jump if not
+	LDA	#Really_sick-30	;force Furby to get sick
+	STA	Sick_counter	;update
 
 No_sneeze:
-
+	LDA	Bored_timer	;get current count
+	STA	TEMP1		;save
 Get_IR_rnd:
-
+	JSR	Random		;get something
+	DEC	TEMP1		;-1
+	BNE	Get_IR_rnd	;loop getting random numbers
+	LDA	Seed_1		;get new random pointer
+	AND	#0Fh		;kill hi nibble
+	STA	TEMP1		;save
+	CLC
+	SBC	#11		;ck if > 11
+	BCC	NormIR_2		;jump if not
+	LDA	#96		;point to table 4
+	JMP	Got_normIR	;
 NormIR_2:
+	LDA	TEMP1		;recover random number
+	CLC
 ;;; page 073 end
-;;; page 074 start XXX
+;;; page 074 start complete
+	SBC	#07		;ck if > 7
+	BCC	NormIR_3		;jump if not
+	LDA	#64		;point to table 3
+	JMP	Got_normIR	;
 NormIR_3:
-
+	LDA	TEMP1		;recover random number
+	CLC
+	SBC	#03		;ck if > 03
+	BCC	NormIR_4		;jump if not
+	LDA	#32		;point to table 2
+	JMP	Got_normIR	;
 NormIR_4:
+	LDA	#00		;force table 1
 
 Got_normIR:
 
-   Include IR2.Asm   
+	CLC
+	ROL	IN_DAT		;16 bit offset for speech
+	CLC
+	ADC	IN_DAT		;create speech field ofsett pointer
+	TAX			;set offset
 
-Ck_front:
+	LDA	IR_S1,X		;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX			;
+	LDA	IR_S1,X		;get hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JMP	Start_macro	;go set group/table pointer for motor & spch
 
-Get_front:
+	Include IR2.Asm		; asm file
 
+;******* end Tracker
+
+
+;************************************************************
+;************************************************************
+;************************************************************
+;************************************************************
+
+Ck_front:		; touch front (tummy)
+
+	JSR	Get_front		;go ck for sensor trigger
+	BCS	Normal_front	;go fini normal spch/motor table
+	JMP	Idle		;no request
+
+Get_front:	; this is the subroutine entry point.
+
+	LDA	Port_C		;get I/O
+	AND	#Touch_frnt	;ck if Firby's chest is rubbed
+	BEQ	Do_tch_ft		;jump if lo
+	LDA	Stat_2		;Get system
+	AND	#Not_tch_ft	;clear previously inverted flag
+	STA	Stat_2		;update
 Touch_end:
-
+	CLC			;clear indicates no sensor request
+	RTS			;
 Do_tch_ft:
+	LDA	Stat_2		;get system
+	AND	#Tchft_dn		;ck if prev done
+	BNE	Touch_end		;jump if was
 ;;; page 074 end
-;;; page 075 start XXX
-Normal_front:
+;;; page 075 start complete
+	LDA	Stat_2		;get system
+	ORA	#Tchft_dn		;flag set ,only execute once
+	STA	Stat_2		;update system
 
+	LDA	Stat_4		;game mode status
+	ORA	#Do_tummy		;flag sensor is active
+	STA	Stat_4		;update
+	SEC			;set indicates sensor is triggered
+	RTS			;
+
+Normal_front:	;enter here to complete sensor speech/motor
+
+;************************************************************
+
+	JSR	Life		;go tweek health/hungry counters
+	BCS	More_front	;if clear then do sensor else bail
+	JMP	Idle		;done
 More_front:
 
-Front_reset:
+;************************************************************
 
+
+	LDA	#Front_split	;get random/sequential split
+	STA	IN_DAT		;save for random routine
+
+	LDX	#Seq_front	;get how many sequential selections
+	LDA	#Ran_front	;get sequential split
+	JSR	Ran_seq		;go decide random/sequential
+
+	LDX	Sensor_timer	;get current for training subroutine
+
+	BCS	Front_rnd		;Random mode when carry set
+
+	LDA	Sensor_timer	;ck if timed out since last action
+	BEQ	Front_reset 	;yep
+
+	LDA	Tchfrnt_count	;save current
+	STA	BIT_CT		;temp store
+
+	INC	Tchfrnt_count	;if not then next table entry
+	LDA	Tchfrnt_count	;get
+	CLC
+	SBC	#Seq_front-1	;ck if > assignment
+	BCC	Front_set		;jump if <
+	LDA	#Seq_front-1	;dont inc off end
+	STA	Tchfrnt_count	;
+	JMP	Front_set		;do it
+Front_reset:
+	LDA	#00		; reset to 1st entry of sequential
+	STA	BIT_CT		; temp store
+	STA	Tchfrnt_count
 Front_set:
+	LDA	#Global_time	;get timer reset value
+	STA	Sensor_timer	;reset it
+	LDA	BIT_CT		;get current pointer to tables
 
 Front_rnd:
+
+	STA	IN_DAT		;save decision
 ;;; page 075 end
 ;;; page 076 start complete
 	LDA	#Front_ID	;which ram location for learned word count (offset)
@@ -3886,63 +4730,361 @@ More_light:
 	LDA	#Light_split	;get random/sequential split
 	STA	IN_DAT		;save for random routine
 ;;; page 078 end
-;;; page 079 start XXX
-Lght_reset:
+;;; page 079 start complete
+	LDX	#Seq_light	;get how many sequential selections
+	LDA	#Ran_light	;get sensor split table
+	JSR	Ran_seq		;go decide random/sequential
 
+	LDX	Sensor_timer	;get current for training subroutine
+
+	BCS	Lghtrand		;Random mode when carry set
+
+	LDA	Sensor_timer	;ck if timed out since last action
+	BEQ	Lght_reset	;yep
+
+	LDA	Lght_count	;save current
+	STA	BIT_CT		;temp store
+
+	INC	Lght_count	;if not then next       table entry
+	LDA	Lght_count	;get
+	CLC
+	SBC	#Seq_light-1	;ck if > assignment
+	BCC	Lght_set		;jump if <
+	LDA	#Seq_light-1	;dont inc off end
+	STA	Lght_count	;
+	JMP	Lght_set		;do it
+Lght_reset:
+	LDA	#00		;reset to 1st entry of sequential
+	STA	BIT_CT		;save temp store
+	STA	Lght_count	;
 Lght_set:
+	LDA	#Global_time	;get timer reset value
+	STA	Sensor_timer	;reset it
+	LDA	BIT_CT		;get current pointer to tables
 
 Lghtrand:
 
+	STA	TEMP4		;save seq/rand pointer
+	LDA	Stat_3		;system
+	AND	#Lght_stat	;ck bit for light/dark table
+	BEQ	Do_dark		;jump if clear
+
+	LDA	TEMP4		;get pointer
+
+	STA	IN_DAT		;save decision
+	LDA	#Light_ID		;which ram location for learned word count (offset)
+	JSR	Start_learn	;go record training info
+	LDA	IN_DAT		;get back word to speak
+
+	JSR	Decid_age		;do age calculation for table entry
+	LDX	TEMP0		;age offset
+	LDA	Light_S1,X	;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX
+	LDA	Light_S1,X	;get hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JMP	Start_macro	;go set group/table Pointer for motor & spch
+
 Do_dark:
+	LDA	TEMP4		;get pointer
+
+	STA	IN_DAT		;save decision
 ;;; page 079 end
-;;; page 080 start XXX
-Ck_sound:
+;;; page 080 start complete
+	LDA	#Dark_ID		;which ram location for learned word count (offset)
+	JSR	Start_learn	;go record training info
+	LDA	IN_DAT		;get back word to speak
 
+	JSR	Decid_age		;do age calculation for table entry
+	LDX	TEMP0		;age offset
+	LDA	Dark_S1,X		;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX			;
+	LDA	Dark_S1,X		;get hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JMP	Start_macro	;go set group/table pointer for motor & spch
+
+;
+;************************************************************
+;************************************************************
+;************************************************************
+;************************************************************
+l
+
+Ck_sound:		;Audio sensor
+	JSR	Get_sound		;now handled as a subroutine
+	BCS	Ck_sound2		;jump if new level > reff
+	JMP	Idle		;nothing to do
 Ck_sound2:
+	JMP	Normal_sound	;jump if new level > reff
 
-Get_sound:
 
+
+Get_sound:	 ;alt entry for diagnostics
+
+
+; The microphone interface generates a square wave of 2k to 100k.
+; We can loop on the sense line and count time for the
+; hi period to determine if sound has changed and compare it to previous
+; samples.
+
+
+	SEI			;disable interrupts
+	LDX	#00		;clear
+	STX	TEMP1		;clear buffer
+	LDX	#FFh		;load loop timer
+	STX	TEMP2		;
 Ck_snd2:
-
+	DEC	TEMP2		;
+	BEQ	Ck_snd4		;jump if timed out
+	LDA	Port_D		;get I/O
+	AND	#Mic_in		;ck sound clk is hi
+	BEQ	Ck_snd2		;wait for it to go hi
+	LDX	#FFh		;load loop timer
+	STX	TEMP2		;
 Ck_snd3:
-
+	INC	TEMP1		;count during lo clk +5
+	BEQ	Snd_over		;jump if rolled over +3
+	LDA	Port_D		;get I/O  +2
+	AND	#Mic_in		;ck if still hi +2
+	BNE	Ck_snd3		;loop till lo +3 (15*166ns=2.49uS)
+	JMP	Ck_snd4		; done
 Snd_over:
 ;;; page 080 end
-;;; page 081 start XXX
+;;; page 081 start complete
+; we should never get here so bail back to idle and this will
+; also prevent system lockup when no clk
+
+	LDA	#250		;never allow roll over
+	STA	TEMP1		;
 Ck_snd4:
+	CLI			;re-enable interrupt
+	JSR	Kick_IRQ		;wait for motor R/C to start working again
+	LDA	TEMP1		;get count
+	CLC			;clear
+	SBC	#05		;is diff > 5
+	BCC	No_snd		;bail out if not
+
+	LDA	Stat_3		;system
+	AND	#Sound_stat	;ck for prev done
+	BNE	No_snd2		;wait till quiet
+
+	LDA	Stat_3		;system
+	ORA	#Sound_stat	;
+	STA	Stat_3		;set prev dn
+
+	LDA	Stat_4		;
+	ORA	#Do_snd		;set   indicating change > reff level
+	STA	Stat_4		;
+
+	SEC			;carry set indicates no change
+	RTS
+
 
 No_snd:
-
+	LDA	Stat_3		;get system
+	AND	#Nt_snd_stat	;clear prev dn
+	STA	Stat_3		;update
 No_snd2:
+	CLC			;carry clear indicates no sound
+	RTS			;done
 
 Normal_sound:
 
-More_sound:
-;;; page 081 end
-;;; page 082 start XXX
-Snd_reset:
+; below routines are jumped to if sound pulse detected
 
+
+
+;************************************************************
+
+	JSR	Life		;go tweek health/hungry counters
+	BCS	More_sound	;if clear then do sensor else bail
+	JMP	Idle		;done
+More_sound:
+
+;************************************************************
+
+	LDA	#Sound_split	;get random/sequential split
+	STA	IN_DAT		;save for random routine
+
+	LDX	#Seq_sound	;get how many sequential selections
+	LDA	#Ran_sound	;number of random selections
+	JSR	Ran_seq		;go decide random/sequential
+;;; page 081 end
+;;; page 082 start complete
+	LDX	Sensor_timer	;get current for training subroutine
+
+	BCS	Sndrand		;Random mode when carry set
+
+	LDA	Sensor_timer	;ck if timed out since last action
+	BEQ	Snd_reset		;yep
+
+	LDA	Sound_count	; save current
+	STA	BIT_CT	;temp store
+
+	INC	Sound_count	; if not then next table entry
+	LDA	Sound_count	;get
+	CLC
+	SBC	#Seq_sound-1	;ck if > max assignment
+	BCC	Snd_set		;jump if <
+	LDA	#Seq_sound-1	;dont inc off end
+	STA	Sound_count	;
+	JMP	Snd_set		;do it
+Snd_reset:
+	LDA	#00		;reset to 1st entry of sequential
+	STA	BIT_CT		;temp store
+	STA	Sound_count	;
 Snd_set:
+	LDA	#Global_time	;get timer reset value
+	STA	Sensor_timer	;reset it
+	LDA	BIT_CT		;get current pointer to tables
 
 Sndrand:
+
+	STA	IN_DAT		;save decision
+	LDA	#Sound_ID		;which ram location for learned word count (offset)
+	JSR	Start_learn	;go record training info
+	LDA	IN_DAT		;get back word to speak
+
+	JSR	Decid_age		; do age calculation for table entry
+	LDX	TEMP0		;age offset
+	LDA	Sound_S1,X	;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX			;
+	LDA	Sound_S1,X	;get hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JMP	Start_macro	;go set group/table pointer for motor & spch
+
+;************************************************************
+;************************************************************
+;************************************************************
+;************************************************************
+;************************************************************
+;************************************************************
+;
+;-------------------------------------------------------------------
+; Misc Subroutines
+;-------------------------------------------------------------------
+
+; SENSOR TRAINING
+
+
+; Training for each sensor is set up here and the decision if the learned
 ;;; page 082 end
-;;; page 083 start XXX
+;;; page 083 start complete
+; word should be played or not.
+; Temp_ID hold the ram offset for the last sensor of the learned word.
+; Temp_ID2 hold the ram offset for the current sensor of the learned word.
+; IN_DAT holds the current word the sensor chose, and will be loaded with
+; the learned word instead if the sensor count > the random number that was
+; just sampled, ie., force learned word to play.
+
+; ****
+
+; If the sensor timer is at 0 when entering here, then the LEARN_TEMP
+; ram location is cleared, else the current learned word is loaded. If
+; the learned word is 0 then all entries are cleared.
+
+
+; When entering, check sensor timer and bail if 0. THen test if this is
+; the back switch and if so then move the current sensor to previous sensor
+; ram and increment the counter.
+; If this is not the back switch, then get previous sensor ram counter and
+; decrement it. THen move all current sensor information to previous and
+; return to caller.
+
+; Because of training difficulties, we now need two back touches to
+; increment training counters. If only one occurs then the normal decrement
+; happens. This double back touch helps to prevent accidentally training
+; with a new macro by hitting the back sw when it is not the macro you
+; have been working with.
+
 Start_learn:
+	STA	Temp_ID2		;sensor ram location of counter (current sensor)
+	LDA	Temp_ID2		;get current sensor ID
+	CMP	#EEh		;EE= this is the back switch (special)
+	BNE	Not_BCK		;jumpif not
+	CPX	#00		;ck if sensor timer timed out
+	BNE	Learn_update	;jump if is back switch and not timed out
 
 Not_BCK:
+	LDA	Temp_ID		;get previous sensor ram offset
+	CMP	#EEh		;ck if last was back sw
+	BEQ	Not_learned	;jump if no sensor prev
+
+	LDX	Temp_ID		;get previous sensor ram offset
+	LDA	Tilt_learned,X	;get learned word counter from ram
+	CMP	Learn_temp	;compare with last word
+	BNE	Do_lrn2		;bail out if different
+	LDA	Tilt_lrn_cnt,X	;prev sensor counter +offset to current sensor
+	CLC
+	SBC	#Learn_chg	;dec learned word counter since not back sw
+	STA	Tilt_lrn_cnt,X	;update
+	BCS	Do_lrn2		;jump if > #Learn_chg
+	BPL	Do_lrn2		;jump if not negative (rolled over)
+	LDA	#00
+	STA	Tilt_lrn_cnt,X	;set to zero, no roll over
 ;;; page 083 end
-;;; page 084 start XXX
+;;; page 084 start complete
 Do_lrn2:
-
+	LDX	Temp_ID		;get sensor learn ram offset
+	JSR	Random		;get a number
+	CLC
+	LDA	Tilt_lrn_cnt,X	;get count
+	CMP	#FFh		;check for max
+	BEQ	Do_lrn2a		;bypass random
+	CLC
+	SBC	Seed_1		;random minus learned word counter
+	BCC	Not_learned	;if less than random then bail out
 Do_lrn2a:
-
+	LDA	Tilt_learned,X	;get learned word counter from ram
+	AND	#0Fh		;make sure never off end of table
+	STA	Tilt_learned,X	;also in ram
+	STA	IN_DAT		;force learned word for sensor
 Not_learned:
+	LDA	IN_DAT		;get curent sensor word
+	STA	Learn_temp	;SAVE FOR NEXT PASS
+	LDA	Temp_ID2		;get current sensor
+	STA	Temp_ID		;save in previous sensor ram
+
+	LDA	Stat_0		;system
+	AND	#EFh		;"Train_Bk_prev"  clear 2nd time thru flag
+	STA	Stat_0		;update
+
+	RTS			;done-ola
 
 Learn_update:
+	LDA	Temp_ID		;sensor ram location for last trigger
+	CMP	#EEh		;EE= this is the back switch (special)
+	BEQ	Not_learned	;bail out if last trigger was also back sw
+	CMP	#FFh		; only happens on power up
+	BEQ	Not_learned	;false call
+
+	LDA	Stat_0		;system
+	AND	#Train_Bk_prev	;is this the 1st or 2nd time thru
+	BNE	Lrn_upd1		;jump if 2nd back sw hit
+	LDA	Stat_0		;system
+	ORA	#Train_Bk_prev	;this is 1st time
+	STA	Stat_0		;update
+	RTS			;my job is done here !
 
 Lrn_upd1:
+	LDA	Stat_0		;system
+	AND	#EFh		;"Train_Bk_prev" clear 2nd time thru flag
+	STA	Stat_0		;update
 
+	LDX	Temp_ID		;sensor ram location for last trigger
+	LDA	Tilt_learned,X	;get learned word from ram
+	CMP	Learn_temp	;ck for training of same word
+	BEQ	Lrn_upd2		;jump if is
+	LDA	Learn_temp	;get new word trainer wants to use
+	STA	Tilt_learned,X	;update new word
+	LDA	#00		;reset to 0 for new word to train
+	STA	Tilt_lrn_cnt,X	;
+	JMP	Not_learned 	;done for now
 Lrn_upd2:
+	CLC
+	LDA	Tilt_lrn_cnt,X	;get learned word counter from ram
 ;;; page 084 end
 ;;; page 085 start complete
 ; on 1st cycle of new learn, we set counter 1/2 way ..... (chicken)
@@ -4435,7 +5577,7 @@ Dec_age2:
 	BNE	Dec_age1	;jump if not
 Spcl_age2:
 	LDA	#32		;point to 2nd field
-	JMP	Do_age		;finish	load from table
+	JMP	Do_age		;finish load from table
 Dec_age1:			;age 1
 	LDA	#00		;point to 1st field
 Do_age:
@@ -4543,124 +5685,560 @@ Random:
 ;*******************************************************************************
 ;*******************************************************************************
 ;;; page 094 end
-;;; page 095 start XXX
+;;; page 095 start complete
 Life:
 
-frst_life:
-;;; page 095 end
-;;; page 096 start XXX
-Max_Sref:
 
-fret_sick:
+; Each FEED trigger increments the HUNGRY counter by (EQU = FOOD).
+
+;Hungry >80 (Need_food) + Sick >C0 (Really_sick) = normal sensor
+;Hungry >80 (Need_food) + Sick <C0 (Really_sick) = random SICK/SENSOR
+;Hungry <80 (Need_food) + Sick >C0 (Really_sick) = random HUNGRY/SENSOR
+;Hungry <80 (Need_food) + Sick <C0 (Really_sick) = random HUNGRY/SICK/SENSOR
+;Hungry <60 (Sick_reff) + Sick <C0 (Really_sick) = random HUNGRY/SICK
+
+;Hungry >60 then each sensor motion increments Sick
+;Hungry <60 then each sensor motion decrements Sick
+
+; When the system does a cold boot,          we set HUNGRY & SICK to FFh.....
+
+; When returning from here, carry is set if sensor should execute
+; normal routine, and cleared if sensor should do nothing.
+
+;REFF only ------
+;Hungry_counter
+;Sick_counter
+
+;Food		EQU	20h	;amount to increase 'Hungry' for each feeding
+;Need_food	EQU	80h	;below this starts complaining about hunger
+;Sick_reff	EQU	60h	;below this starts complaining about sickness
+;Really_sick	EQU	C0h	;below this only complains about sickness
+
+;Hungry_dec	EQU	01	;subtract X amount for each sensor trigger
+;Sick_dec		EQU	01	;subtract X amount for each sensor trigger
+;Max_sick	EQU	see EQU
+
+
+
+	LDA	Hungry_counter	;current
+
+;mod F-rels2 ;
+;	CLC
+	SEC
+;end mod
+
+	SBC	#Hungry_dec	;-X for each trigger
+	BCS	frst_life		;jump if not neg
+	LDA	#00		;reset
+frst_life:
+	STA	Hungry_counter	;get count
+	CLC
+	SBC	#Sick_reff	;ck if getting sick
+	BCS	Sick_inc		;jump if not sick
+	LDA	Sick_counter	;current
+
+;mod F-rels2 ;
+;	CLC
+	SEC
+;end mod
+
+;mod testr3a
+
+;	SBC	#Sick_dec		;-X for each trigger
+;	BCS	frst_sick		;jump if not neg
+;;; page 095 end
+;;; page 096 start complete
+	LDA	#00		;reset
+
+	SBC	#Sick_dec		;-X for each trigger
+	STA	Sick_counter	;
+	BCC	Max_Sref		;jump if neg
+	CLC
+	LDA	Sick_counter	;get again
+	SBC	#Max_sick		;ck if at minimum allowed count
+	BCS	frst_sick		;jump if not at min
+Max_Sref:
+	LDA	#Max_sick		;set to min
+
+frst_sick:
+	STA	Sick_counter	;
+	JMP	Hunger1		;
+;end mod testr3a
 
 Sick_inc:
-
+	INC	Sick_counter	;+1 if is
+	BNE	No_sick_inc	;jump if didnt roll over
+	LDA	#FFh		;if did then set to max
+	STA	Sick_counter
 No_sick_inc:
 
 Hunger1:
+	LDA	Sick_counter	;ck how sick
+	CLC
+	SBC	#Really_sick	;decide if too sick to play
+	BCC	Hunger2		;jump if <
 
+	LDA	Hungry_counter	;check how hungry he   is
+	CLC
+	SBC	#Need_food	;ck if getting hungry
+	BCC	Decd_Hung_norm	;jump if is
 Life_normal:
+	SEC	;tell sensor to do normal routine
+	RTS	; done
 
 Hunger2:
+	LDA	Hungry_counter	;check how hungry he is
+	CLC
+	SBC	#Sick_reff	;ck if very hungry and is sick
+	BCC	Decd_Hung_sick	;only speak hungry / sick
+
+	LDA	Hungry_counter	;check how hungry he is
+	CLC
+	SBC	#Need_food	;ck if getting hungry
+	BCS	Decd_Sick_norm	;jump if is
+;	JMP	Decd_Hung_sck_norm	;do hungry & sick speech
 
 Decd_Hung_sck_norm:
+	JSR	Random		;need 3-way decision
+	CLC
+	SBC	#A0h		;hi split
+	BCS	Life_normal	;>A0 = normal sensor
+	LDA	Seed_1		;get again
+	BMI	Say_sick		;>80
+	JMP	Say_hunger	;<80
 
 Decd_Hung_norm:
 ;;; page 096 end
-;;; page 097 start XXX
+;;; page 097 start complete
+	JSR	Random		;go get random 50/50 decision
+	BMI	Life_normal	;
+	JMP	Say_hunger	;
+;
 Decd_Sick_norm:
-
+	JSR	Random		;go get random 50/50 decision
+	BMI	Life_normal	;
+	JMP	Say_sick		;
+;
 Decd_Hung_sick:
+	JSR	Random		;go get random 50/50 decision
+	BMI	Say_hunger	;
+	JMP	Say_sick		;
 
 Say_hunger:
+	LDA	#Hunger_split	;get random/sequential split
+	STA	IN_DAT		;save for random routine
 
+	LDX	#Seq_hunger	;get how many sequential selections
+	LDA	#Ran_hunger	;get number of random slections
+	JSR	Ran_seq		;go decide random/sequential
+	BCS	Hunger_ran	;Random mode when carry SET
+
+	LDA	Sensor_timer	;ck if timed out since last action
+	BEQ	Hunger_reset	;yep
+	INC	Hungr_count	;if not then next table entry
+	LDA	Hungr_count	;get
+	CLC
+	SBC	#Seq_hunger-1	;ck if > assignment
+	BCC	Hunger_side	;jump if <
+	LDA	#Seq_hunger-1	;dont inc off end
+	STA	Hungr_count	;
+	JMP	Hunger_side	;do it
 Hunger_reset:
-
+	LDA	#00		;reset to 1st entry of sequential
+	STA	Hungr_count	;
 Hunger_side:
+	LDA	#Global_time	;get timer reset value
+	STA	Sensor_timer	;reset it
+	LDA	Hungr_count	;get current pointer to tables
 
 Hunger_ran:
-
+	JSR	Decid_age		;do age calculation for table entry
+	LDX	TEMP0		;age offset
+	LDA	Hunger_S1,X	;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX			;
+	LDA	Hunger_S1,X	;get hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JSR	Get_macro		;go start motor/speech
+	JSR	Notrdy		;Do / get  status for speech and motor
+	CLC			;tells sensor to do nothing
+	RTS
+;
 Say_sick:
-;;; page 097 end
-;;; page 098 start XXX
-Sick_reset:
+	LDA	#Sick_split	;get random/sequential split
+	STA	IN_DAT		;save for random routine
 
+	LDX	#Seq_sick		;get how many sequential selections
+	LDA	#Ran_sick		;get number of random elections
+;;; page 097 end
+;;; page 098 start complete
+	JSR	Ran_seq		;go decide random/sequential
+	BCS	Sick_ran		;Random mode when carry SET
+
+	LDA	Sensor_timer	;ck if timed out since last action
+	BEQ	Sick_reset	;yep
+	INC	Sickr_count	;if not then next table entry
+	LDA	Sickr_count	;get
+	CLC
+	SBC	#Seq_sick-1	;ck if > assignment
+	BCC	Sick_side		;jump if <
+	LDA	#Seq_sick-1	;dont inc off end
+	STA	Sickr_count	;
+	JMP	Sick_side		;do it
+Sick_reset:
+	LDA	#00		;reset to 1st entry of sequential
+	STA	Sickr_count	;
 Sick_side:
+	LDA	#Global_time	;get timer reset value
+	STA	Sensor_timer	;reset it
+	LDA	Sickr_count	;get current pointer to tables
 
 Sick_ran:
+	JSR	Decid_age		;do age calculation for table entry
+	LDX	TEMP0		;age offset
+	LDA	Sick_S1,X		;get lo byte
+	STA	Macro_Lo		;save lo byte of Macro table entry
+	INX			;
+	LDA	Sick_S1,X		;get hi byte
+	STA	Macro_Hi		;save hi byte of Macro table entry
+	JSR	Get_macro		;go start motor/speech
+	JSR	Notrdy		;Do / get status for speech and motor
+	CLC			;tells sensor to d  nothing
+	RTS
+
+
+;************************************************************
+;************************************************************
+;
+
+
 
 GoToSleep:
 
-Nodrk_prev:
+; save light sensor fail or sleep command in 'Seed_2'into EEPROM
 
+	LDA	Stat_0		;system
+	AND	#Dark_sleep_prev 	;
+	BEQ	Nodrk_prev	;jump if none
+	LDA	#01		;set flag that it was done
+	STA	Seed_2		;save in EEPROM
+	JMP	Gs2		;
+Nodrk_prev:
+	LDA	#00		;set   flag that it was clear
+	STA	Seed_2		;save in EEPROM
 Gs2:
+
+
+
+;************************************************************
+
+;   EEPROM WRITE
 ;;; page 098 end
-;;; page 099 start XXX
+;;; page 099 start complete
+; Enter with 'TEMP0' holding adrs of 0-63. Areg holds lo byte and
+; Xreg holds hi byte. If carry is clear then it was succesfull, if
+; carry is set the write failed.
+
+; MODIFIED eeprom , load lo byte in temp1 and hi byte in temp2
+;  and call EEWRIT2.
+
+	LDA	#00		;use DAC output to put TI in reset
+	STA	DAC1		;
+	SEI			;turn IRQ off
+
+	LDA	#00		;EEPROM adrs to write data to
+	STA	Sgroup		;save adrs
+	LDA	#13		;number of ram adrs to transfer (x/2)
+	STA	Which_delay	;save
+	LDA	#00		;Xreg offset
+	STA	Which_motor	;save
+
+; Need one read cycle before a write to wake up EEPROM
+
+	LDX	Which_motor	;eeprom address to read from
+	JSR	EEREAD		;get data (wakes up eeprom)
+
+
 IWrite_loop:
+
+	LDA	Sgroup		;get next EEPROM adrs
+	STA	TEMP0		;buffer
+	LDX	Which_motor	; ram source
+	LDA	Age,X		;lo byte (data byte #1)
+	STA	TEMP1		;save data bytes
+	INC	Which_motor	;
+	INX
+	LDA	Age,X		;
+	STA	TEMP2		;hi byte (data byte #2)
+	JSR	EEWRIT2		;send em
+;	BCS	EEfail		;jump if bad
+
+	INC	Sgroup		;0-63 EEPROM adrs next
+	INC	Sgroup		;0-63 EEPROM adrs next     (eeprom writes 2 bytes)
+	INC	Which_motor	;next adrs
+	DEC	Which_delay	;how many to send
+	BNE	IWrite_loop	;send some more
+
+;************************************************************
 
 GoToSleep_2:
 
-   Include Sleep.asm	;
+
+
+	Include	Sleep.asm		;
+
+
+
+;-------------------------------------------------------------------------------
+; Interrupt Subroutines
+;-------------------------------------------------------------------------------
 ;;; page 099 end
-;;; page 100 start XXX
+;;; page 100 start complete
+
+
+;************ CAUTION ************
+; Any ram location written outside of IRQ can only be read in the IRQ,
+; likewise if written in the IRQ, then can only be read outside the IRQ.
+; THIS WILL PREVENT DATA CORRRUPTION.
+
+
+
 NMI:
+	RTI		;Not used
+
+
 
 IRQ:
+	PHA		;push acc on stack
+	PHP		;push cpu status on stack
+
+;****** timer A = 166 uSEC *******
 
 CkTimerA:
+;	LDA	Interrupts	;get who did it
+;	AND	#20H		; test for timerA
+;	BNE	Do_ta		;jump if is
+;	JMP	Ck_timerB		;
+
+;Do_ta:
+
+;***** timer B = 700 uSEC ******
 
 Ck_timerB:
+	LDA	Interrupts	;get status again
+	AND	#10H		;test for timer B
+	BNE	Do_timeB		;jump if request true
+	JMP	Intt_false	;bypass all if not
+
+;          also changed TimerB relaod value from #10h to 00 in EQU
 
 Do_timeB:
 
+;------------------------------------------------
+
+; RE-CALIBRATE SWITCH for motor position
+
+; This counter must meet a threshold to decide if the
+; calposition switch is really engaged.
+
+	LDA	Port_C		;get I/O
+	AND	#Motor_cal	;lo when limit hit
+	BNE	No_cal_sw		;no position switch found
+	INC	Cal_switch_cnt	;inc each time found low
+	BNE	Cal_noroll	;jump if didnt roll over (stopped on switch)
+	LDA	#31		;max count
+	STA	Cal_switch_cnt	;
 Cal_noroll:
+	LDA	Cal_switch_cnt	;
+	CLC
+	SBC	#30		;ck if enough counts
+	BCC	No_lim_stp	;jump if not enough
+	LDA	#Cal_pos_fwd	; force value
+	STA	Pot_timeL2	;reset both
 ;;; page 100 end
-;;; page 101 start XXX
+;;; page 101 start complete
+	JMP	No_lim_stp	; done
+
 No_cal_sw:
+	LDA	#00		;clear count if hi
+	STA	Cal_switch_cnt	;update
+
+;------------------------------------------------------------
+
 
 No_lim_stp:
 
-WTa:
+	LDA	Wait_time		;4 times thru loop = 2.9 mSec
+	BNE	WTa		;>0
+	LDA	#04		;counter reset
+	STA	Wait_time		;reload
+	JMP	Timer_norm	;
+WTa:	DEC	Wait_time		;
+	JMP	TimerB_dn		;bypass timers until done
 
 Timer_norm:
 
+;********* Below routines run at 2.9 mSec
+
+	LDA	Mot_speed_cnt	;ck for active
+	BEQ	No_spd_m		;jump if not
+	DEC	Mot_speed_cnt	;-1
 No_spd_m:
 
-No_matop:
+	LDA	motorstoped	;motor drift timer
+	BEQ	No_mstop		;jump if done
+	DEC	motorstoped	;-1
+No_mstop:
 
+	LDA	Motor_led_timer	; Motor_led timer * 742 mSec
+	BEQ	TimeB1		;jump if done
+	DEC	Motor_led_timer	;-1
 TimeB1:
-
+	LDA	Cycle_timer	;2.9mSec timer * cycle reload
+	BEQ	TimeB2		;jump if done
+	DEC	Cycle_timer	;-1
 TimeB2:
-
+;m	LDA	Motor_pulse	;2.9mSec timer * Motor_pulse
+;m	BEQ	TimeB1		;jump if done
+;m	DEC	Motor_pulse	;-1
 TimeB3:
 
+	DEC	Mili_sec		;-1 & allow rollover
+	BNE	TimerB_dn		;wait for rollover  (2.9mS * 256 = 742mSec)
+	INC	Milisec_flag	;tell task rtn to decrement timers
+
 TimerB_dn:
+
+;**********	We could test all interrupts here as needed
+;Ck2Khz:
+;CkSOOhz:
+;Ck60hz:
+
+;**********	Check motor position - IR slot in wheel sensor
 ;;; page 101 end
-;;; page 102 start XXX
+;;; page 102 start complete
+; This version does two reads to eliminate noise and sets a done flag to
+; prevent multiple counts. It also reads twice when no slot is present to
+; clear the done flag.
+
+	LDA	Port_C		;get I/O
+	AND	#Pos_sen		;ck position sensor
+	BNE	Clr_pos		;jump if no I.R. trigger
+	LDA	Port_C		;get I/O
+	AND	#Pos_sen		; READ 2x to prevent noise trigger
+	BNE	Clr_pos		;jump if no IR trigger
+	LDA	Slot_vote		;get prev cycle
+	BEQ	Pc_done		;bail if prev counted
+	LDA	#00		;
+	STA	Slot_vote		;set ram to 0. (faster than setting a bit)
+	JMP	Force_int		;go count slot
+
 Clr_pos:
+	LDA	Port_C		;get I/O
+	AND	#Pos_sen		;  READ 2x to prevent noise trigger
+	BEQ	Pc_done		;not 2 equal reads so bypass this cycle
+	STA	Slot_vote		;set ram to 1. (faster than setting a bit)
+	JMP	Pc_done		;
+
+
+;
+;****************************************
 
 ExtportC:
+	JMP	Intt_false	;this should be turned off
+;	LDA	Interrupts	;get status again
+;	AND	#01H		; test for port C bit 1 rising edge
+;	BEQ	Pc_done		; jump if not
 
 Force_int:
+;	LDA	Port_D_Image	;system
+;	AND	#Motor_led	;ck if position I.R. led is on
+;	BEQ	Pc_done		;jump if not off
 
+	LDA	Stat_2		;get system
+	AND	#Motor_fwd	;if set then FWD else REV
+	BEQ	Cnt_rev		;jump if clr
+	INC	Pot_timeL2	;sensor counter
+	CLC
+	LDA	Pot_timeL2	;current
+	SBC	#207		;ck for > 207
+	BCC	Updt_cnt		;jump if not
+	LDA	#00		;roll over
+	STA	Pot_timeL2	;
+	JMP	Updt_cnt		;
 Cnt_rev:
-
+	DEC	Pot_timeL2	;-1
+	CLC
+	LDA	#208		;max count
+	SBC	Pot_timeL2	;ck for negative ( >207 )
+	BCS	Updt_cnt		;jump if not
 Cnt_dn:
-
+	LDA	#207		;when neg roll over to max count
+	STA	Pot_timeL2	;
 Updt_cnt:
+	INC	Drift_counter	;to be used for braking pulse
 ;;; page 102 end
-;;; page 103 start XXX
+;;; page 103 start complete
+	LDA	Pot_timeL2	;get current count
+	STA	Pot_timeL		;save in motor routine counter
+
+; THis routine used to calculate motor speed based on battery voltage.
+	LDA	Mot_speed_cnt	;ck for active
+	BEQ	Pc_done		;jump if not
+	INC	Mot_opto_cnt	;
+
 Pc_done:
-
+	LDA	Motor_led_timer	;ck if active (>0)
+	BEQ	Mot_led_off	;jump if done
+	LDA	Port_D_Image	;system
+	ORA	#Motor_led	;turn LED on
+	JMP	Mot_led_dn	;
 Mot_led_off:
-
+	LDA	Port_D_Image	;system
+	AND	#Nt_Motor_led	;turn LED off
 Mot_led_dn:
+	STA	Port_D_Image	;update motor led
 
 M_drft_F1:
+	LDA	Drift_fwd		;get delay value
+	BEQ	M_drft_R1		;jump if prev done
+	LDA	Drift_fwd		;get delay value
+	CMP	#01		;01=turn motors off
+	BEQ	M_drft_F2		;send it
 
+	DEC	Drift_fwd		;-1
+;m32
+	LDA	Port_D_Image	;get system (note lo is tranys off)
+	AND	#3Fh		;turn both motors off to prevent transistors
+	STA	Port_D		;on at same time
+;m32
+	LDA	Port_D_Image	;get system
+	ORA	#Motor_off	;turn both motors off
+	AND	#Motor_fwds	;move motor in fwd dir to stop motion
+	JMP	Intt_motor_end
 M_drft_F2:
+	DEC	Drift_fwd		;-1
+	LDA	Port_D_Image	;get system
+	ORA	#Motor_off	;turn both motors off
+	JMP	Intt_motor_end
 
 M_drft_R1:
+	LDA	Drift_rev		;get delay value
+	BEQ	Intt_motor	;jump if prev done
+	LDA	Drift_rev		;get delay value
+	CMP	#01		;01=turn motors off
+	BEQ	M_drft_R2		;send it
+	DEC	Drift_rev		;-1
+
+;m32
+	LDA	Port_D_Image	;get system   (note lo is tranys off)
+	AND	#3Fh		;turn both motors off to prevent transistors
+	STA	Port_D		;on at jame time
+;m32
+
+	LDA	Port_D_Image	;get system
+	ORA	#Motor_off	;tum both motors off
+	AND	#Motor_revs	;move motor in rev dir to stop motion
 ;;; page 103 end
 ;;; page 104 start complete
 	JMP	Intt_motor_end
@@ -4977,3 +6555,4 @@ Do_spch:
 ;;;  missing  Sleep.Asm
 ;;;
 
+  Include Furby27.inc
