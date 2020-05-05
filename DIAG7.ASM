@@ -512,7 +512,7 @@ Clear:
 
 	LDA	#80h		;get random/sequential split
 ;;; page 123 end
-;;; page 124 start XXX; DIAG7 page 9
+;;; page 124 start complete; DIAG7 page 9
 	STA	IN_DAT		;save for random routine
 
 	LDX	#00		;make sure only gives random
@@ -574,3 +574,5 @@ Clear:
 
 	JMP	GoToSleep		;write ee memory YO !
 ;;; page 124 end
+;;; page 125 start complete; DIAG7 page 10 (blank)
+;;; page 125 end
