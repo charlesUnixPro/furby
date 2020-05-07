@@ -1,46 +1,43 @@
-;;; Missing labels
-
-TI_reset equ fe00h
-Name_table equ fe10h
-Word_group0 equ fe11h
-Word_group1 equ fe12h
-Word_group2 equ fe13h
-Word_active equ   15h
-Clr_word_end equ fe16h
-Set_end equ fe17h
-Spch_more equ fe18h
-GBYTE	equ fe19h
-
-;;; cac I am not sure how Furby 27 gets included. XXX
-
-;  Include Furby27.inc
-
-
-;Voice_table equ ff00h
-;Name_table equ ff01h
-
-
-
-;
-; Table of contents
-;
-; pg   3-4       Voice EQUs
-; pg   4         Motor EQUs
-; pg   5-7       I/O port EQUs
-; pg   7-9       Timer EQUs
-; pg   9-10      DAC EQUs
-; pg  10         Sensor EQUs
-; pg  10-14      Run EQUs
-; pg  14-19      Variables, stack
-; pg  19-25      RESET handler
-; pg  26-        Idle handler
-; 
-; pg  98-99      EEPROM write
-; pg  99         Sleep code
-; pg  99-105     Interupt handlers
-;
-; pg 105-108     TI sound chip communication
-;
+;;; XXX Missing labels
+;;; XXX
+;;; XXX TI_reset
+;;; XXX Name_table
+;;; XXX Word_group0
+;;; XXX Word_group1
+;;; XXX Word_group2
+;;; XXX Clr_word_end
+;;; XXX Set_end
+;;; XXX Spch_more
+;;; XXX GBYTE
+;;; XXX Voice_table
+;;; XXX Name_table
+;;; XXX
+;;; XXX  cac I am not sure how Furby 27 gets included. XXX
+;;; XXX  Included at end XXX
+;;; XXX   Include Furby27.inc
+;;; XXX
+;;; XXX
+;;; XXX 
+;;; XXX  Table of contents
+;;; XXX 
+;;; XXX  pg   3-4       Voice EQUs
+;;; XXX  pg   4         Motor EQUs
+;;; XXX  pg   5-7       I/O port EQUs
+;;; XXX  pg   7-9       Timer EQUs
+;;; XXX  pg   9-10      DAC EQUs
+;;; XXX  pg  10         Sensor EQUs
+;;; XXX  pg  10-14      Run EQUs
+;;; XXX  pg  14-19      Variables, stack
+;;; XXX  pg  19-25      RESET handler
+;;; XXX  pg  26-        Idle handler
+;;; XXX  
+;;; XXX  pg  98-99      EEPROM write
+;;; XXX  pg  99         Sleep code
+;;; XXX  pg  99-105     Interupt handlers
+;;; XXX 
+;;; XXX  pg 105-108     TI sound chip communication
+;;; XXX 
+;;; XXX
 ;;; page 001 start complete
 ;*******************************************************************************
 ;
@@ -6514,7 +6511,7 @@ Get_group2:
 Word_fini:
 	LDA	Stat_1		;get system
 	ORA	#Say_activ	;Set spch active after word pointer loaded
-	ORA	#Word_active	;Set status
+	ORA	#Word_activ	;Set status
 	STA	Stat_1		;update system
 	JMP	Do_spch		;go say it
 
