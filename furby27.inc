@@ -2580,14 +2580,14 @@ Tbl2_Macro158:		;SG DONE
 Tbl2_Macro159:		;SG DONE
 	DW	124
 	DW	140
-;	DW	141
+     ;	DW	141
 	DW	00	;end
 ;
 Tbl2_Macro160:		;SG DONE
 	DW	124
 	DW	142
 	DW	143
-;	DW	141
+     ;	DW	141
 	DW	00	;end
 ;
 Tbl2_Macro161:		;SG DONE
@@ -2595,7 +2595,7 @@ Tbl2_Macro161:		;SG DONE
 	DW	144
 	DW	145
 	DW	146
-;DW	141
+	;DW	141
 	DW	00	;end
 ;
 Tbl2_Macro162:		;SG DONE
@@ -4076,7 +4076,7 @@ Tbl4_Macro422:
 	DW	00	;end
 ;
 Tbl4_Macro423:
-	DW	383	;seq7.8 ir age4
+	DW	383	;seq7,8 ir age4
 	DW	00	;end
 ;
 Tbl4_Macro424:
@@ -4884,8 +4884,9 @@ Tbl1_say012:
 Tbl1_say013:
 	DB	58	;speech speed
 	DB	Voice    ;system pitch setting
-;;;<	DB	138,136,117	;seq12 FRONT AGE1 ADD SAY20 ON FRONTPART
-;;;>	DB	138,136,117	;seq12 FRONT AGE1 ADD
+;;; XXX 128 guess
+;;;<	DB	128,136,117	;seq12 FRONT AGE1 ADD SAY20 ON FRONTPART
+;;;>	DB	128,136,117	;seq12 FRONT AGE1 ADD
 ;;;>SAY20 ON FRONTPART
 	DB	FFH	;end
 ;
@@ -4912,7 +4913,7 @@ Tbl1_say016:
 Tbl1_say017:
 	DB	46	;speech speed
 	DB	Voice	;system pitch setting
-	DB	37	;seq16 FRONT AGE1 BETWEEN 2(FAY20)ADDSAY37
+	DB	37	;seq16 FRONT AGE1 BETWEEN 2(SAY20)ADDSAY37
 	DB	FFH	; end
 ;
 Tbl1_say018:
@@ -4936,7 +4937,7 @@ Tbl1_say020:
 Tbl1_say021:
 	DB	46	;speech speed
 	DB	Voice	;system pitch setting
-	DB	39,39	; SEQ3AGE2 FRONT AID SEQ9AGE1
+	DB	39,39	; SEQ3AGE2 FRONT ADD SEQ9AGE1
 	DB	FFH	;end
 ;;; page 203 end
 ;;; page 204 start complete; FURBY27.INC page 79
@@ -5024,7 +5025,9 @@ Tbl1_say034:
 Tbl1_say035:
 	DB	56	;speech speed
 	DB	Voice+6   ;system pitch setting
-	DB	35,162,48,162,93,133    ;SEQ16 FRONT AGE2 ADD20 TO BEGGINING
+;;;<	DB	35,162,48,162,93,133    ;SEQ16 FRONT AGE2 ADD20 TO BEGGINING
+;;;>	DB	35,162,48,162,93,133    ;SEQ16 FRONT AGE2 ADD20 TO
+;;;>BEGGINING
 	DB	FFH	;end
 ;
 Tbl1_say036:
@@ -5044,7 +5047,7 @@ Tbl1_say038:
 	DB	Voice+8	;system pitch setting
 	DB	1,1	;SEQ3 FRONT AGE3 ADD29
 	DB	FFH	; end
-
+;
 Tbl1_say039:
 	DB	50	;speech speed
 	DB	Voice+6   ;system pitch setting
@@ -5052,6 +5055,7 @@ Tbl1_say039:
 	DB	FFH	;end
 ;
 
+;
 ;ERROR
 ;Tbl1_say040:
 ;	DB	46	;speech speed
@@ -5093,7 +5097,9 @@ Tbl1_say042:
 Tbl1_say043:
 	DB	30	;speech speed
 	DB	Voice+8	;system pitch setting
-	DB	96,165,165,165,129,149	;seq10 FRONT AGE3 ADD SAY20
+;;;<	DB	96,165,165,165,129,149	;seq10 FRONT AGE3 ADD SAY20
+;;;>	DB	96,165,165,165,129,149	;seq10 FRONT AGE3 ADD
+;;;>SAY20
 	DB	FFH	;end
 ;
 Tbl1_say044:
@@ -5249,12 +5255,11 @@ Tbl1_say067:
 	DB	FFH   ; end
 ;;; page 208 end
 ;;; page 209 start complete; FURBY27.INC page 84
-;;; page 209 end
 ;
 Tbl1_say068:
 	DB	46	;speech speed
 	DB	Voice	;system pitch setting
-	DB	64	;FORTUNE TELL (02WHA)
+	DB	64	;FORTUNE TELL (O2WHA)
 	DB	FFH    ;end
 ;
 Tbl1_say069:
@@ -5310,6 +5315,7 @@ Tbl1_say077:
 	DB	Voice	;system pitch setting
 	DB	129	;FORTUNE (oH oH)
 	DB	FFH	; end
+;;; page 209 end
 ;;; page 210 start complete; FURBY27.INC page 85
 Tbl1_say078:
 	DB	50	;speech speed
@@ -5325,7 +5331,9 @@ Tbl1_say078:
 Tbl1_say079:
 	DB	56	;speech speed
 	DB	Voice+8	;system pitch setting
-	DB	110	;SEQ1 HANGING (DE DE DE ,DUM   DUM DUM DUM) AGE1
+;;;<	DB	110	;SEQ1 HANGING (DE DE DE ,DUM   DUM DUM DUM) AGE1
+;;;>	DB	110	;SEQ1 HANGING (DE DE DE ,DUM   DUM DUM
+;;;>DUM) AGE1
 	DB	FFH	;end
 ;
 Tbl1_say080:
@@ -5343,19 +5351,22 @@ Tbl1_say081:
 Tbl1_say082:
 	DB	46	;speech speed
 	DB	Voice+7	;system pitch setting
-	DB	113	;SEQ3 HANGING (YA DA DA ) {yes, a colon - that's an error in the original thing!}
+;;; XXX the semicolon might be a colon
+	DB	113	;SEQ3 HANGING (YA DA DA )
 	DB	FFH    ;end
 ;
 Tbl1_say083:
 	DB	53	;speech speed
 	DB	Voice+5	;system pitch setting
-	DB	162,114,162,114	;SEQ3 HANGING (OMPAH  bRUMM) {transcription note: see above}
+;;; XXX the semicolon might be a colon
+	DB	162,114,162,114	;SEQ3 HANGING (OMPAH  bRUMM)
 	DB	FFH	;end
 ;
 Tbl1_say084:
 	DB	46	;speech speed
 	DB	Voice+8 ;system pitch setting
-	DB	115	;SEQ3 HANGING (YA DA DA OMPAH bRUMM BABABUM) {transcription note: see above}
+;;; XXX the semicolon might be a colon
+	DB	115	;SEQ3 HANGING (YA DA DA OMPAH bRUMM BABABUM)
 	DB	FFH	;end
 ;
 Tbl1_say085:
@@ -5386,6 +5397,7 @@ Tbl1_say088:
 Tbl1_say089:
 	DB	46	;speech speed
 	DB	Voice+7	;system pitch setting
+;;; XXX the semicolon might be a colon
 	DB	143,163	;SEQ6 HANGING (SNORE)
 	DB	FFH    ;end
 ;
@@ -5447,7 +5459,7 @@ Tbl1_say098:
 ;
 Tbl1_say099:
 	DB	46	;speech speed
-	DB	Voice+8	;system pitch sorting
+	DB	Voice+8	;system pitch setting
 	DB	100	; SEQ13 SEQ14 HANGING (HAA)
 	DB	FFH    ; end
 ;
@@ -5465,7 +5477,7 @@ Tbl1_say101:
 ;
 Tbl1_say102:
 	DB	46	; speech speed
-	DB	Voice ;system, pitch setting
+	DB	Voice ;system pitch setting
 	DB	165,165,165,165	;SEQ16 HANGING (PAUSE)   ADD20
 	DB	FFH	;end
 ;
@@ -5528,6 +5540,7 @@ Tbl1_say108:
 ;	DB	Voice+8   ;system pitch setting
 ;;	DB	;SEQ1 FEED AGE1 (AY-TAY)
 ;	DB	FFH	;end
+;
 
 Tbl1_say109:
 	DB	100	;speech speed
@@ -5538,13 +5551,13 @@ Tbl1_say109:
 Tbl1_say110:
 	DB	56	;speech speed
 	DB	Voice+3	;system pitch setting
-	DB	39	;SEQ2 FEED AGE1 IKOH-KOH)
+	DB	39	;SEQ2 FEED AGE1 (KOH-KOH)
 	DB	FFH    ;end
 ;
 Tbl1_say111:
 	DB	56	;speech speed
 	DB	Voice+7	;system pitch setting
-	DB	55	;SEQ2 FEED AGE1 (MEE HEE)
+	DB	55	;SEQ2 FEED AGE1 (MEE MEE)
 	DB	FFH	;end
 ;
 Tbl1_say112:
@@ -5552,7 +5565,6 @@ Tbl1_say112:
 	DB	Voice ;system pitch setting
 	DB	25	;SEQ2 FEED AGE1              (E-DAY)
 	DB	FFH    ;end
-
 ;
 ;;; page 213 end
 ;;; page 214 start complete; FURBY27.INC page 89
@@ -5600,7 +5612,7 @@ Tbl1_say119:
 ;
 Tbl1_say120:
 	DB	46	;speech speed
-	DB	Voice+8    ;system pitch setting
+	DB	Voice+8    ;system pitch setting	;A TAY
 	DB	7
 	DB	FFH   ;end
 ;
@@ -5636,32 +5648,32 @@ Tbl1_say122:
 ;	DB	Voice-8    ;system pitch setting
 ;	DB	161,164,161	;SEQ10 HANGING (YAWN)
 ;	DB	FFH	;end
-
+;
 ;Tbl2_say119:
 ;	DB	60	;speech speed
 ;	DB	55	;speech speed
 ;	DB	Voice+3    ;system pitch setting
 ;	DB	165,165,144,165,144,165,144,165,144
-
+;
 ;	DB	Voice	;system pitch setting
 ;	DB	144
-;	DB	FFH	;end
+;;; XXX should be commented out
+	DB	FFH	;end
 
 Tbl1_say123:
 	DB	46	;speech speed
-	DB	Voice ;system, pitch setting
+	DB	Voice ;system pitch setting
 	DB	20	;seq4 feed done
 	DB	FFH    ; end
 ;END GEORGE 07/05/98
 ;END FEED
 ;
 ;
-
+;
 ; WAKE
 ;GEORGE 07/06/98
-
-
-
+;
+;
 ;START AT 2
 Tbl1_say124:		;SG DONE
 	DB	70	;speech speed
@@ -5800,7 +5812,7 @@ Tbl2_say143:		;SG DONE
 	DB	82
 	DB	FFH   ;end
 ;
-Tbl2_say144		;SG DONE
+Tbl2_say144:		;SG DONE
 	DB	46	;speech speed
 	DB	Voice ;system pitch setting
 ;;; page 217 end
@@ -5840,7 +5852,7 @@ Tbl2_say148:		;SG DONE
 ;
 Tbl2_say149:		;SG DONE
 	DB	30	;speech speed
-	DB	Voice-5   ;system pitch setting
+	DB	Voice+5   ;system pitch setting
 	DB	47
 	DB	FFH	;end
 ;
@@ -5887,7 +5899,6 @@ Tbl2_say156:		;SG DONE
 	DB	Voice ;system pitch setting
 	DB	1
 	DB	FFH   ;end
-
 
 
 ;TBL1_SAY53
@@ -5979,7 +5990,6 @@ POS.
 ;END GEORGE 07/06/98
 ;END HUNGER
 
-
 ;
 ;
 ;GEORGE 07/07/98
@@ -6007,7 +6017,7 @@ Tbl2_say171:		;SG DONE
 ;
 Tbl2_say172:		;SG DONE
 	DB	55            ;speech speed
-	DB	Voice+8             ;system am pitch setting
+	DB	Voice+8             ;system pitch setting
 	DB	148
 	DB	FFH     ;end
 ;
@@ -6024,7 +6034,7 @@ Tbl2_say174:		;SG DONE
 	DB	FFH        ;end
 ;
 Tbl2_say175:		;SG DONE
-	DB	55   --  ;speech speed
+	DB	55        ;speech speed
 	DB	Voice-5    ;system pitch setting
 	DB	9
 	DB	FFH        ;end
@@ -6149,31 +6159,31 @@ Tbl2_say193:          ;SG DONE   ;BACKSG
 	DB	Voice ;system pitch setting
 	DB	153
 	DB	FFH   ;end
-
+;
 Tbl2_say194:     ;SG DONE
 	DB	75       ;speech speed
 	DB	Voice ;system pitch setting
 	DB	2
 	DB	FFH          ;end
-
+;
 Tbl2_say195:     ;SG DONE
 	DB	55       ;speech speed
 	DB	Voice ;system pitch setting
 	DB	39
 	DB	FFH        ;end
-
+;
 Tbl2_say196:          ;SG DONE
 	DB	65       ;speech speed
 	DB	Voice+4    ;system pitch setting
 	DB	67           ; PET
 	DB	FFH        ; end
-
+;
 Tbl2_say197:          ;SG DONE
 	DB	75       ;speech speed
 	DB	Voice+5    ;system pitch setting
 	DB	1
 	DB	FFH        ; end
-
+;
 Tbl2_say198:          ;SG DONE
 	DB	55       ;speech speed
 	DB	Voice-10    ;system pitch setting
@@ -6445,19 +6455,19 @@ Tbl2_say237:		;SG DONE   ;SICK1
 ;	DB	Voice           ;system pitch setting
 ;	DB	10
 ;	DB	FFH             ;end
-
+;
 Tbl2_say238:               ;SG DONE
 	DB	46       ;speech speed
 	DB	Voice ;system pitch setting
 	DB	40
 	DB	FFH    ; end
-
+;
 Tbl2_say239:		; SG DONE
 	DB	46                    ;speech speed
 	DB	Voice-5                  ;system pitch setting
 	DB	60
 	DB	FFH    ; end
-
+;
 Tbl2_say240:                ; SG DONE
 	DB	50       ;speech speed
 	DB	Voice ;system pitch setting
@@ -6545,7 +6555,9 @@ Tbl2_say250:              ;SG DONE
 ;GEORGE 07/08/98
 ;starts at 2
 Tbl2_say251:
-	DB	40    ;speech speed    DONE RB       BEGIN LIGHT D.(BRIGHTER)
+;;;<	DB	40    ;speech speed    DONE RB       BEGIN LIGHT D.(BRIGHTER)
+;;;>	DB	40    ;speech speed    DONE RB       BEGIN LIGHT
+;;;>D.(BRIGHTER)
 ;;; page 229 end
 ;;; page 230 start complete; FURBY27.INC page 105
 	DB	Voice ;pitch control
@@ -6575,7 +6587,7 @@ Tbl2_say254:
 	DB	Voice ;system pitch setting
 	DB	102,149
 	DB	FFH      ;end
-
+;
 Tbl2_say255:
 	DB	46      ;speech speed DONE RB
 	DB	Voice+8   ;system pitch setting
@@ -6673,61 +6685,61 @@ Tbl3_say269:
 ;;; page 231 end
 ;;; page 232 start complete; FURBY27.INC page 107
 	DB	FFH          ;               end
-
+;
 Tbl3_say270:
 	DB	70      ;speech speed
 	DB	Voice+8   ;system pitch setting
 	DB	148,10,6,148
 	DB	FFH     ; end
-
+;
 Tbl3_say271:
 	DB	59      ;speech speed
 	DB	Voice+4   ;system pitch setting
 	DB	149,163,21,21   ;SEQ6 AGE4/SEQ14 AGE4 LIGHT js
 	DB	FFH          ; end
-
+;
 Tbl3_say272:
 	DB	52      ; speech speed
 	DB	Voice+8    ;system pitch setting
 	DB	119,35,162,10,5,81
 	DB	FFH     ;end    DONE RB
-
+;
 Tbl3_say273:
 	DB	60      ;speech speed
 	DB	Voice+8   ;pitch control  DONE RB
 	DB	63,163,149,163,163,51,35,152
 	DB	FFH     ; end
-
+;
 Tbl3_say274:
 	DB	52      ;speech speed
 	DB	Voice+2   ;system pitch setting
 	DB	119,60,6
 	DB	FFH     ; end
-
+;
 Tbl3_say275:
 	DB	52      ;speech speed
 	DB	Voice+2    ;pitch control
 	DB	119,60,45,85
 	DB	FFH     ; end DONE RB
-
+;
 Tbl3_say276:
 	DB	60               ;speech speed
 	DB	Voice+2            ;system pitch setting    DONE RB
 	DB	119,42,82,23
 	DB	FFH   ;end
-
+;
 Tbl3_say277:
 	DB	70      ;speech speed
 	DB	Voice+2   ;system pitch setting
 	DB	148,60,6,148
 	DB	FFH              ;end   DONE RB
-
+;
 Tbl3_say278:
 	DB	52      ;speech speed
 	DB	Voice+2   ;system pitch setting            DONE RB
 	DB	119,52,60,70,81
 	DB	FFH         ;end
-
+;
 Tbl3_say279:
 	DB	52      ;speech speed
 	DB	Voice ;system pitch setting
@@ -6755,7 +6767,9 @@ Tbl3_say282:
 	DB	FFH      ;end   DONE RB
 ;
 Tbl3_say283:
-	DB	60      ;speech speed   !!NOTE!!  PRINTED TA  K HAD WRONG WORD NUMBER FOR "KISS"
+;;;<	DB	60      ;speech speed   !!NOTE!!  PRINTED TABLE HAD WRONG WORD NUMBER FOR "KISS"
+;;;>	DB	60      ;speech speed   !!NOTE!!  PRINTED TABLE HAD
+;;;>WRONG WORD NUMBER FOR "KISS"
 	DB	Voice ;system pitch setting
 	DB	63,149,162,38,35,152
 	DB	FFH     ;end   DONE RB
@@ -6775,6 +6789,7 @@ Tbl3_say285:
 Tbl3_say286:
 	DB	60      ;speech speed
 	DB	Voice ;system pitch setting
+;;; XXX 83 guess
 	DB	119,42,83,68
 	DB	FFH     ;end
 ;
@@ -6787,7 +6802,7 @@ Tbl3_say287:
 Tbl3_say288:
 	DB	46       (speech speed
 	DB	Voice ;system pitch setting
-	DB	119,163.52,60,70,93      ;SEQ7 AGE4/SEQ15 AGE 4 LIGHT js
+	DB	119,163,52,60,70,93      ;SEQ7 AGE4/SEQ15 AGE 4 LIGHT js
 	DB	FFH     ;end
 ;
 Tbl3_say289:
@@ -6825,7 +6840,7 @@ Tbl3_say292:
 Tbl3_say293:
 	DB	46       ;speech speed
 	DB	Voice ;system pitch setting
-	DB	163.125,164,5,162,41                   ;S4-A1/S12-A1 SOUND js
+	DB	163,125,164,5,162,41                   ;S4-A1/S12-A1 SOUND js
 	DB	FFH    ;end
 ;
 Tbl3_say294:
@@ -6857,6 +6872,7 @@ Tbl3_say298:
 	DB	Voice ;system pitch setting
 ;;; page 234 end
 ;;; page 235 start complete; FURBY27.INC page 110
+;;;; XXX 167 guess
 	DB	121,165,164,8,167,41,21  ; S3-A2/S11-A2 SOUND js
 	DB	FFH     ;end
 ;
@@ -6869,13 +6885,19 @@ Tbl3_say299:
 Tbl3_say300:
 	DB	46      ;speech speed
 	DB	Voice ;system pitch setting
-	DB	35,165,31       ;S5-A2/S13-A2/S5-A3 SOUND (with say/m2) js
-	DB	FFH       ;end   ;S13-A3/S5-A4/S13-A4 SOUND (with say/m2) js
+;;;<	DB	35,165,31       ;S5-A2/S13-A2/S5-A3 SOUND (with say/m2) js
+;;;<	DB	FFH       ;end   ;S13-A3/S5-A4/S13-A4 SOUND (with say/m2) js
+;;;>	DB	35,165,31       ;S5-A2/S13-A2/S5-A3 SOUND (with say/m2)
+;;;>js
+;;;>	DB	FFH       ;end   ;S13-A3/S5-A4/S13-A4 SOUND (with say/m2)
+;;;>js
 ;
 Tbl3_say301:
 	DB	46      ;speech speed
 	DB	Voice ;system pitch setting
-	DB	8,162,41,163,85           ;S7-A2/S15-A2 SOUND    (with say/m2) js
+;;;<	DB	8,162,41,163,85           ;S7-A2/S15-A2 SOUND    (with say/m2) js
+;;;>	DB	8,162,41,163,85           ;S7-A2/S15-A2 SOUND    (with
+;;;>say/m2) js
 	DB	FFH     ; end
 ;
 Tbl3_say302:
@@ -6966,7 +6988,7 @@ Tbl3_say314:
 Tbl3_say315:
 	DB	46       ;speech speed
 	DB	Voice    ;system pitch setting
-	DB	155,39,39  ;S7 A1 TILT/S6 A2 TILT ja
+	DB	155,39,39  ;S7 A1 TILT/S6 A2 TILT js
 	DB	FFH      ;end
 ;
 Tbl3_say316:
@@ -7078,7 +7100,9 @@ Tbl3_say332:
 Tbl3_say333:
 	DB	46           ;speech speed
 	DB	Voice ;pitch control
-	DB	154,118,163,145,165,162,118            ;S16 A2/S14 A3/S14 A4 TILT js
+;;;<	DB	154,118,163,145,165,162,118            ;S16 A2/S14 A3/S14 A4 TILT js
+;;;>	DB	154,118,163,145,165,162,118            ;S16 A2/S14 A3/S14 A4
+;;;>TILT js
 	DB	FFH         ; end
 ;
 Tbl3_say334:
@@ -7256,7 +7280,9 @@ Tbl3_say360:
 Tbl3_say361:
 	DB	46           ;speech speed
 	DB	Voice ;system pitch setting
-	DB	91,31,165,165,165,165,165,165,128,31       ;seq13,14 ir age1
+;;;<	DB	91,31,165,165,165,165,165,165,128,31       ;seq13,14 ir age1
+;;;>	DB	91,31,165,165,165,165,165,165,128,31       ;seq13,14 ir
+;;;>age1
 	DB	FFH        ;end
 ;
 Tbl3_say362:
@@ -7294,7 +7320,9 @@ Tbl3_say366:
 Tbl3_say367:
 	DB	46      ;speech speed
 	DB	Voice+7   ;system pitch setting
-	DB	19,165,165,165,164,85,134,165,135                  ;seq7,8 ir age2
+;;;<	DB	19,165,165,165,164,85,134,165,135                  ;seq7,8 ir age2
+;;;>	DB	19,165,165,165,164,85,134,165,135                  ;seq7,8 ir
+;;;>age2
 	DB	FFH     ;end
 ;
 Tbl3_say368:
@@ -7318,7 +7346,9 @@ Tbl3_say370:
 Tbl3_say371:
 	DB	48      ;speech speed
 	DB	Voice ;system pitch setting
-	DB	91,31,165,165,165,165,165,165,124,31             ;seq13,14 ir age2
+;;;<	DB	91,31,165,165,165,165,165,165,124,31             ;seq13,14 ir age2
+;;;>	DB	91,31,165,165,165,165,165,165,124,31             ;seq13,14 ir
+;;;>age2
 	DB	FFH        ;end
 ;
 Tbl3_say372:
@@ -7366,15 +7396,15 @@ Tbl3_say378:
 	DB	FFH    ; end
 ;
 Tbl3_say379:
-	DB	50       speech speed
+	DB	50       ;speech speed
 	DB	Voice+3   ;system pitch setting
-	DB	63,165,165,165,165,165,124,31.   ;seq13,14 ir age3
+	DB	63,165,165,165,165,165,124,31   ;seq13,14 ir age3
 	DB	FFH    ;end
 ;
 Tbl3_say380:
 	DB	70      ;speech speed
 	DB	Voice+4   ;system pitch setting
-	DB	35,72,162,162,162,162.162,162,162,162,162,162,161
+	DB	35,72,162,162,162,162,162,162,162,162,162,162,161
 	DB	FFH     ;end
 ;
 Tbl3_say381:
@@ -7404,30 +7434,33 @@ Tbl4_say384:
 Tbl4_say385:
 	DB	50      ;speech speed
 	DB	Voice+8   ;system pitch setting
-	DB	119,44,52,71,150        ;seq10 ir age4
-	DB	FFH     ;end    SAY NUMBERS MODIFIED TO MATCH CORRECT DIALOGUE
+;;; XXX semicolon missing
+	DB	119,44,52,71,150        seq10 ir age4
+;;;<	DB	FFH     ;end    SAY NUMBERS MODIFIED TO MATCH CORRECT DIALOGUE
+;;;>	DB	FFH     ;end    SAY NUMBERS MODIFIED TO MATCH CORRECT
 ;;; page 243 end
 ;;; page 244 start complete; FURBY27.INC page 119
+;;;>DIALOGUE
+
 ;
 Tbl4_say386:
 	DB	46       ;speech speed
 	DB	Voice+8    ;system pitch setting
 	DB	34,85,99        ;seq11 ir age4
 	DB	FFH    ;end
-
-
+;
 Tbl4_say387:
 	DB	50      ;speech speed
 	DB	Voice+1   ;system pitch setting
 	DB	119,124,31       ;seq12 ir ago4
 	DB	FFH   ;end
-
+;
 Tbl4_say388:
 	DB	56          ;speech speed
 	DB	Voice+3       ;system pitch setting
 	DB	162,63          ;seq14 ir age4
 	DB	FFH    ; end
-
+;
 Tbl4_say389:
 	DB	60       ;speech speed
 	DB	Voice-8    ;system pitch setting
@@ -7436,7 +7469,7 @@ Tbl4_say389:
 ;	DB	Voice+3    ;system pitch setting
 ;	DB	161,144,144       ;seq15 ir age4
 	DB	FFH    ;end
-
+;
 ;Tbl1_say41:
 ;	DB	46       ;speech speed
 ;	DB	Voice+4    ;system pitch setting
@@ -7981,7 +8014,6 @@ Tbl1_M000:
 	DB	FFH   ; end
 
 
-
 ;GEORGE 07/03/96
 Tbl1_M001:                                             ;dON START  SEQ1 AGE1
 	DB	1                          ;motor delay between steps
@@ -7995,13 +8027,17 @@ Tbl1_M002:                                             ;dON START   SEQ2 AGE1
 ;
 Tbl1_M003:
 	DB	10              ;motor delay between steps
-	DB	90,100,0,0,0,100,0,0,0,0,133   ;CONNECTED M23 ;dON START SEQ3 AGE1
+;;;<	DB	90,100,0,0,0,100,0,0,0,0,133   ;CONNECTED M23 ;dON START SEQ3 AGE1
+;;;>	DB	90,100,0,0,0,100,0,0,0,0,133   ;CONNECTED M23 ;dON START
+;;;>SEQ3 AGE1
 ;	DB	145,160,0,0,0,160
 	DB	FFH      ;end
 ;
 Tbl1_M004:
 	DB	1               ;motor delay between steps
-	DB	200,190,160,100,133         ;CONNECTED M22 ;dON START SEQ3 AGE1
+;;;<	DB	200,190,160,100,133         ;CONNECTED M22 ;dON START SEQ3 AGE1
+;;;>	DB	200,190,160,100,133         ;CONNECTED M22 ;dON START
+;;;>SEQ3 AGE1
 	DB	FFH      ;end
 ;
 Tbl1_M005:
@@ -8049,17 +8085,27 @@ Tbl1_M012:
 Tbl1_M013:
 	DB	20             ;motor delay between steps
 	DB	145,133,145,133,145,133,145
-	DB	125,0,0,0,0,0,130,0,0,90,133     ;seql2 FRONT AGE1 ADD SAY20 TO FRONT
+;;;<	DB	125,0,0,0,0,0,130,0,0,90,133     ;seql2 FRONT AGE1 ADD SAY20 TO FRONT
+;;;>	DB	125,0,0,0,0,0,130,0,0,90,133     ;seql2 FRONT AGE1 ADD
+;;;>SAY20 TO FRONT
 	DB	FFH     ;end
 ;
 Tbl1_M014:
-	DB	10                                 ;motor delay between steps
-	DB	90,130,120,0,0,133                 ;seq13 FRONT AGE1 ADD SAY 22
+;;;<	DB	10                                 ;motor delay between steps
+;;;>	DB	10                                 ;motor delay between
+;;;>steps
+;;;<	DB	90,130,120,0,0,133                 ;seq13 FRONT AGE1 ADD SAY 22
+;;;>	DB	90,130,120,0,0,133                 ;seq13 FRONT AGE1 ADD
+;;;>SAY 22
 	DB	FFH      ;end
 ;
 Tbl1_M015:
-	DB	10                                 ;motor delay between steps
-	DB	125,110,133                        ;seql4 FRONT AGE1 ADD SAY22
+;;;<	DB	10                                 ;motor delay between steps
+;;;>	DB	10                                 ;motor delay between
+;;;>steps
+;;;<	DB	125,110,133                        ;seql4 FRONT AGE1 ADD SAY22
+;;;>	DB	125,110,133                        ;seql4 FRONT AGE1 ADD
+;;;>SAY22
 	DB	FFH      ;end
 ;
 Tbl1_M016:
@@ -8069,12 +8115,16 @@ Tbl1_M016:
 ;
 Tbl1_M017:
 	DB	10             ;motor delay between steps
-	DB	120,133,125,150,120,0,0,0,0,0,0,0,0,133         ;seq16 FRONT AGE1 ADD 37
+;;;<	DB	120,133,125,150,120,0,0,0,0,0,0,0,0,133         ;seq16 FRONT AGE1 ADD 37
+;;;>	DB	120,133,125,150,120,0,0,0,0,0,0,0,0,133         ;seq16 FRONT
+;;;>AGE1 ADD 37
 	DB	FFH      ;end
 ;
 Tbl1_M018:
 	DB	1               ;motor delay between steps
-	DB	124,0,115,0,133,120,133                       ;seq16 FRONT AGE1 ADD 37
+;;;<	DB	124,0,115,0,133,120,133                       ;seq16 FRONT AGE1 ADD 37
+;;;>	DB	124,0,115,0,133,120,133                       ;seq16 FRONT
+;;;>AGE1 ADD 37
 	DB	FFH     ; end
 ;
 ;;; page 254 end
@@ -8084,10 +8134,10 @@ Tbl1_M019:
 ;	DB	90,100,0,0,0,100,0,0,0,0,133        ;SEQ1 FRONT AGE2
 	DB	175,160,0,0,0,160,0,0,0,0,133
 	DB	FFH        ;end
-
+;
 Tbl1_M020:
 	DB	10               ;motor delay between steps
-	DB	143,150,133,155,133               ;SEQ2 FRONT AGE2
+	DB	143,150,133,155,133               ;SEQ2 fRONT AGE2
 	DB	FFH        ;end
 ;
 Tbl1_M021:
@@ -8095,34 +8145,34 @@ Tbl1_M021:
 	DB	180,133,180,133
 ;	DB	100,70,10,133            ;SEQ3AGE2 FRONT ADD SEQ9AGE1
 	DB	FFH        ;end
-
+;
 Tbl1_M022:
 	DB	10                  ;motor delay between steps
 	DB	140,150,133                    ;SEQ4 AGE2 FRONT
 	DB	FFH      ;end
-
+;
 Tbl1_M023:
 	DB	1               ;motor delay between steps
 	DB	120,133,0,0,0,0,0,0,0,140,150,133       ;SEQ4 AGE2
 	DB	FFH        ;end
-
+;
 Tbl1_M024:
 	DB	5              ;motor delay between steps
 ;	;SEQ5 AGE2 FRONT
 	DB	150,140,138,120,145,133,0,147,133
 	DB	FFH        ; end
-
+;
 Tbl1_M025:
 	DB	1               ;motor delay between steps
 	DB	150,200,0,0,150,133,143,133,143
 	DB	133,110,133       ;SEQ6 AGE2 FRONT
 	DB	FFH        ;end
-
+;
 Tbl1_M026:
 	DB	10                           ;motor delay between steps
 	DB	142,150,133                  ;SEQ 7 AGE2 FRONT PART1
 	DB	FFH         ;end
-
+;
 Tbl1_M027:
 	DB	1                   ;motor delay between steps
 ;SEQ 7 AGE2 FRONT PART2
@@ -8134,8 +8184,7 @@ Tbl1_M028:
 	DB	1                    ;motor delay between steps
 	DB	30,70 ;<- OK        ;SEQ8 MIDDLE OF 22,AND 4SOMETHING
 	DB	FFH         ;end     ;
-
-
+;
 Tbl1_M029:
 	DB	1                  ;motor delay between steps
 	DB	190,133             ;SEQ 9 TITTER
@@ -8150,7 +8199,9 @@ Tbl1_M030:
 ;
 Tbl1_M031:
 	DB	5               ;motor delay between steps
-	DB	180,160,133,115,105,133                   ;SEQ11 FRONT AGE 2 ADD 41
+;;;<	DB	180,160,133,115,105,133                   ;SEQ11 FRONT AGE 2 ADD 41
+;;;>	DB	180,160,133,115,105,133                   ;SEQ11 FRONT
+;;;>AGE 2 ADD 41
 	DB	FFH     ;end
 ;
 Tbl1_M032:
@@ -8160,7 +8211,9 @@ Tbl1_M032:
 ;
 Tbl1_M033:
 	DB	1               ;motor delay between steps
-	DB	150,170,190,133,120,133,135,133,150,0,0,133       ;SEQ14 FRONT
+;;;<	DB	150,170,190,133,120,133,135,133,150,0,0,133       ;SEQ14 FRONT
+;;;>	DB	150,170,190,133,120,133,135,133,150,0,0,133       ;SEQ14
+;;;>FRONT
 	DB	FFH     ;end
 ;
 Tbl1_M034:
@@ -8171,7 +8224,9 @@ Tbl1_M034:
 Tbl1_M035:
 	DB	1               ;motor delay between steps
 	DB	120,0,0,0,0,0,0,0,133,145
-	DB	133,0,150,133,110,133,120,0,0,133     ;SEQ16 FRONT AGE2 ADD 20
+;;;<	DB	133,0,150,133,110,133,120,0,0,133     ;SEQ16 FRONT AGE2 ADD 20
+;;;>	DB	133,0,150,133,110,133,120,0,0,133     ;SEQ16 FRONT AGE2
+;;;>ADD 20
 	DB	FFH     ;end
 ;
 Tbl1_M036:
@@ -8196,7 +8251,9 @@ Tbl1_M039:
 ;ERROR
 ;Tbl1_M040:
 ;	DB	10                ;motor delay between steps
-;	DB	140,150,133                        ;SEQ5 FRONT AGE3 ADD SEQ14AGE1
+;;;<;	DB	140,150,133                        ;SEQ5 FRONT AGE3 ADD SEQ14AGE1
+;;;>;	DB	140,150,133                        ;SEQ5 FRONT AGE3 ADD
+;;;>SEQ14AGE1
 ;	DB	FFH      ;end
 ;;; page 256 end
 ;;; page 257 start complete; FURBY27.INC page 132
@@ -8231,17 +8288,23 @@ Tbl1_M044:
 ;
 Tbl1_M045:
 	DB	10               ;motor delay between steps
-	DB	150,0,0,133,120,100,133         ;SEQ12 FRONT AGE3 (HEEY,TICKLE ME) ADD20               DB           4
+;;;<	DB	150,0,0,133,120,100,133         ;SEQ12 FRONT AGE3 (HEEY,TICKLE ME) ADD20               DB           4
+;;;>	DB	150,0,0,133,120,100,133         ;SEQ12 FRONT AGE3
+;;;>(HEEY,TICKLE ME) ADD20	DB	4
 	DB	FFH         ;end
 ;
 Tbl1_M046:
 	DB	10             ;motor delay between steps
-	DB	145,133,145,133,145,133         ;SEQ13 £RONT AGE3 (NANNY,NANNY)     ADD20
+;;;<	DB	145,133,145,133,145,133         ;SEQ13 £RONT AGE3 (NANNY,NANNY)     ADD20
+;;;>	DB	145,133,145,133,145,133         ;SEQ13 £RONT AGE3
+;;;>(NANNY,NANNY)     ADD20
 	DB	FFH     ;end
 ;
 Tbl1_M047:
 	DB	1            ;motor delay between steps
-	DB	125,0,130,0,0,90,133   ;SEQ13 fRONT AGE3 (RASBERRY, HE HE HE )   ADD20
+;;;<	DB	125,0,130,0,0,90,133   ;SEQ13 fRONT AGE3 (RASBERRY, HE HE HE )   ADD20
+;;;>	DB	125,0,130,0,0,90,133   ;SEQ13 fRONT AGE3 (RASBERRY, HE
+;;;>HE HE )   ADD20
 	DB	FFH     ;end
 ;
 Tbl1_M048:
@@ -8283,12 +8346,16 @@ Tbl1_M054:
 ;
 Tbl1_M055:
 	DB	10                ;motor delay between steps
-	DB	135,133,150,0,0,133          ;SEQ5 (HE HE HE)       FRONT AGE4 ADD26
+;;;<	DB	135,133,150,0,0,133          ;SEQ5 (HE HE HE)       FRONT AGE4 ADD26
+;;;>	DB	135,133,150,0,0,133          ;SEQ5 (HE HE HE)       FRONT AGE4
+;;;>ADD26
 	DB	FFH        ;end
 ;
 Tbl1_M056:
 	DB	10                ;motor delay between steps
-	DB	154,133,115,0,0,0,0,0,0,133         ;SEQ5 (BIG FUN!      FRONT AGE4 ADD26
+;;;<	DB	154,133,115,0,0,0,0,0,0,133         ;SEQ5 (BIG FUN!      FRONT AGE4 ADD26
+;;;>	DB	154,133,115,0,0,0,0,0,0,133         ;SEQ5 (BIG FUN!      FRONT
+;;;>AGE4 ADD26
 	DB	FFH        ;end
 ;
 Tbl1_M057:
@@ -8418,13 +8485,17 @@ Tbl1_M078:
 ;GEORGE 07/04/98
 ;
 Tbl1_M079:
-	DB	;motor delay between steps
-	DB	150,133,135,150,133              ;SEQ1 HANGING(DE DE DE ,DUM  DUM DUM DUM) AGE1
+	DB	1	;motor delay between steps
+;;;<	DB	150,133,135,150,133              ;SEQ1 HANGING(DE DE DE ,DUM  DUM DUM DUM) AGE1
+;;;>	DB	150,133,135,150,133              ;SEQ1 HANGING(DE DE DE ,DUM  DUM
+;;;>DUM DUM) AGE1
 	DB	FFH   ;end
 ;
 Tbl1_M080:
-	DB	;motor delay between steps
-	DB	190,133                   ;SEQ1 HANGING(DUM  DUM DUM DUM) AGE1
+	DB	1	;motor delay between steps
+;;;<	DB	190,133                   ;SEQ1 HANGING(DUM  DUM DUM DUM) AGE1
+;;;>	DB	190,133                   ;SEQ1 HANGING(DUM  DUM DUM DUM)
+;;;>AGE1
 	DB	FFH         ; end
 ;
 Tbl1_M081:
@@ -8444,8 +8515,9 @@ Tbl1_M083:
 ;;; page 260 end
 ;;; page 261 start complete; FURBY27.INC page 136
 	DB	190,120,133
-	DB	150,133,150,133      ;SEQ3 HANGING   ( OMPAH   bRUMM
-BABABUM)
+;;;<	DB	150,133,150,133      ;SEQ3 HANGING   ( OMPAH   bRUMM BABABUM)
+;;;>	DB	150,133,150,133      ;SEQ3 HANGING   ( OMPAH   bRUMM
+;;;>BABABUM)
 	DB	FFH        ;end
 ;
 Tbl1_M084:
@@ -8466,17 +8538,23 @@ Tbl1_M086:
 ;
 Tbl1_M087:
 	DB	1                       ;motor delay between steps
-	DB	120,0,0,0,0,0,0,0,133   ;SEQ5 HANGING (HUMM BO DAH WAY- LOH)
+;;;<	DB	120,0,0,0,0,0,0,0,133   ;SEQ5 HANGING (HUMM BO DAH WAY- LOH)
+;;;>	DB	120,0,0,0,0,0,0,0,133   ;SEQ5 HANGING (HUMM BO DAH WAY-
+;;;>LOH)
 	DB	FFH     ; end
-
+;
 ;Tbl1_M088:
 ;	DB	10                         ;motor delay between steps
-;	DB	115,133,139,155,160,133    ;SEQ5 HANGING (HUMM BO DAH WAY- LOH)
+;;;<;	DB	115,133,139,155,160,133    ;SEQ5 HANGING (HUMM BO DAH WAY- LOH)
+;;;>;	DB	115,133,139,155,160,133    ;SEQ5 HANGING (HUMM BO DAH WAY-
+;;;>LOH)
 ;	DB	FFH        ;end
-
+;
 Tbl1_M088:
 	DB	10                      ;motor delay between steps
-	;DB	115,133,139,155,160,133 ;SEQ5 HANGING (HUMM BO DAH WAY LOH)
+;;;<	;DB	115,133,139,155,160,133 ;SEQ5 HANGING (HUMM BO DAH WAY LOH)
+;;;>	;DB	115,133,139,155,160,133 ;SEQ5 HANGING (HUMM BO DAH WAY-
+;;;>LOH)
 	DB	115,133,160,133       ;SEQ5 HANGING   (HUMM BO DAH WAY-LOH)
 	DB	FFH        ;end
 ;
@@ -8577,7 +8655,6 @@ Tbl1_M106:
 	DB	FFH     ;end
 ;	------------------------------------------------------
 
-
 ;END HANGOUT
 ;
 ;
@@ -8599,7 +8676,9 @@ Tbl1_M108:
 Tbl1_M109:
 	DB	1                ;motor delay between steps
 ;	DB	140
-	DB	165,0,0,0,0,0,0,150,0,0,165,0,0,0,0,0,0,133            ;SEQ1 FEED AGE1 (AAAAH)
+;;;<	DB	165,0,0,0,0,0,0,150,0,0,165,0,0,0,0,0,0,133            ;SEQ1 FEED AGE1 (AAAAH)
+;;;>	DB	165,0,0,0,0,0,0,150,0,0,165,0,0,0,0,0,0,133            ;SEQ1
+;;;>FEED AGE1 (AAAAH)
 	DB	FFH   ;end
 ;
 Tbl1_M110:
@@ -8692,7 +8771,7 @@ Tbl1_M125:                                     ;SG DONE
 	DB	75,90     ;<- OK
 	DB	FFh
 Tbl1_M126:                                      ;SG DONE
-	DB	;motor delay between steps
+	DB	1	;motor delay between steps
 	DB	135,120,135
 	DB	FFh
 Tbl1_M127:                                    ; SG DONE
@@ -8801,7 +8880,7 @@ Tbl2_M145:                      ;SG DONE
 ;
 Tbl2_M146:                      ;SG DONE
 	DB	1              ;motor delay between steps
-;DB	90,75
+	;DB	90,75
 
 	DB	90,133
 	DB	FFH     ;end
@@ -8840,7 +8919,7 @@ Tbl2_M152:                           ;SG DONE
 	DB	1              ;motor delay between steps
 	DB	75
 	DB	FFH        ; end
-;
+
 ; danger
 Tbl2_M153:                      ;SG DONE
 	DB	1               ;motor delay between steps
@@ -8849,7 +8928,9 @@ Tbl2_M153:                      ;SG DONE
 ; danger sleep
 Tbl2_M154:                         ;SG DONE
 	DB	100                ;motor delay between steps
-	DB	0,0,0,85,30,0,20,0,85,30,0,20,0,85,30,0,20,0,75,0,0,0,0,85
+;;;<	DB	0,0,0,85,30,0,20,0,85,30,0,20,0,85,30,0,20,0,75,0,0,0,0,85
+;;;>	DB
+;;;>0,0,0,85,30,0,20,0,85,30,0,20,0,85,30,0,20,0,75,0,0,0,0,85
 	DB	30,0,20,0,10
 	DB	FFH    ;end
 ;danger
@@ -8873,7 +8954,7 @@ Tbl2_M157:                            ;SG DONE     ; HUNGER
 ;;; page 267 end
 ;;; page 268 start complete; FURBY27.INC page 143
 	DB	50                   ;motor delay between steps
-;DB	120,120,133
+	;DB	120,120,133
 	DB	120,0,133
 	DB	FFH         ;end
 ;
@@ -8909,14 +8990,14 @@ Tbl2_M163:                                     ;SG DONE
 ;
 Tbl2_M164:                                     ;SG DONE
 	DB	50                    ;motor delay between steps
-;DB	148,148,133
+	;DB	148,148,133
 
 	DB	148,0,133
 	DB	FFH     ;end
 ;
 Tbl2_M165:                                     ;SG DONE
 	DB	50                    ;motor delay between steps
-;DB	150,150,150,133
+	;DB	150,150,150,133
 
 	DB	150,0,0,133
 	DB	FFH      ;end
@@ -8930,7 +9011,7 @@ Tbl2_M167:                                     ;SG DONE
 	DB	1                    ;motor delay between steps
 	DB	115,133
 	DB	FFH        ;end
-;
+
 Tbl2_M168:                                    ;SG DONE
 ;;; page 268 end
 ;;; page 269 start complete; FURBY27.INC page 144
@@ -9029,7 +9110,7 @@ Tbl2_M184:                                ;SG DONE
 ;
 Tbl2_M185:                                ;SG DONE
 	DB	1                ;motor delay between steps
-;DB	150,150,133
+	;DB	150,150,133
 
 	DB	150,0,133
 	DB	FFH     ;end
@@ -9076,7 +9157,7 @@ Tbl2_M192:
 ;start at 202
 Tbl2_M193:             ;BACKSG                  ;SG DONE
 	DB	100               ;motor delay between steps
-;DB	200,200,200,200,133
+	;DB	200,200,200,200,133
 	DB	200,0,0,0,133
 	DB	FFH     ;end
 ;
@@ -9214,14 +9295,22 @@ Tbl2_M218:                               ;SG DONE
 ;
 Tbl2_M219:                       ;SG DONE
 	DB	10          ;motor delay between steps
-;	DB	120,130,120, 130,120,130,120,130,120,130,120,130,115,115,133
-	DB	120,130,120, 130,120,130,120,130,120,130,120,130,115,0,133
+;;;<;	DB	120,130,120, 130,120,130,120,130,120,130,120,130,115,115,133
+;;;<	DB	120,130,120, 130,120,130,120,130,120,130,120,130,115,0,133
+;;;>;	DB
+;;;>120,130,120, 130,120,130,120,130,120,130,120,130,115,115,133
+;;;>	DB
+;;;>120,130,120, 130,120,130,120,130,120,130,120,130,115,0,133
 	DB	FFH     ;end
 ;
 Tbl2_M220:                               ;SG DONE
 	DB	10              ;motor delay between steps
-; DB	120,130,120, 130,120,130,120,130,120,130,120,130,115,115,133
-	DB	120,130,120, 130,120,130,120,130,120,130,120,130,115,0,133
+;;;<; DB	120,130,120, 130,120,130,120,130,120,130,120,130,115,115,133
+;;;<	DB	120,130,120, 130,120,130,120,130,120,130,120,130,115,0,133
+;;;>; DB
+;;;>120,130,120, 130,120,130,120,130,120,130,120,130,115,115,133
+;;;>	DB
+;;;>120,130,120, 130,120,130,120,130,120,130,120,130,115,0,133
 	DB	FFH     ;end
 ;
 Tbl2_M221:                               ; SG DONE
@@ -9240,50 +9329,50 @@ Tbl2_M223:                                ;SG DONE
 ;;; page 273 end
 ;;; page 274 start complete; FURBY27.INC page 149
 	DB	FFH        ;end
-
+;
 Tbl2_M224:                              ;SG DONE
 	DB	1               ;motor delay between steps
 	DB	75,133
 	DB	FFH     ;end
-
+;
 Tbl2_M225:                              ;SG DONE
 	DB	1              ;motor delay between steps
 	DB	110,133
 	DB	FFH     ; end
-
+;
 Tbl2_M226:                             ;SG DONE
 	DB	100                 ;motor delay between steps
 	DB	120,133
 	DB	FFH   ; end
-
+;
 Tbl2_M227:                           ;SG DONE
 	DB	30              ;motor delay between steps
-	DB	190,120.125,120,125,120,125,133
+	DB	190,120,125,120,125,120,125,133
 	DB	FFH    ; end
-
+;
 Tbl2_M228:                            ;SG DONE
 	DB	1              ;mctor delay between steps
-	DB	115,130.110,130,115,133
+	DB	115,130,110,130,115,133
 	DB	FFH   ;end
-
+;
 Tbl2_M229:                              ;SG DONE
 	DB	30               .-motor delay between steps
 ; DB	115,120,110,110,110,133
 	DB	115,120,110,0,0,133
 	DB	FFH     ;end
-
+;
 Tbl2_M230:                               ;SG DONE
 	DB	1               ;motor delay between steps
-	DB	110,125.115,133
+	DB	110,125,115,133
 	DB	FFH     ;end
-
+;
 Tbl2_M231:                              ;SG DONE
 	DB	1              ;motor delay between steps
 	DB	75,133
 	DB	FFH     ; end
-
+;
 Tbl2_M232:                              ;SG DONE
-	DB	;motor delay between steps
+	DB	1	;motor delay between steps
 	DB	110,133
 	DB	FFH     ; end
 ; danger
@@ -9291,13 +9380,13 @@ Tbl2_M233:                              ;SG DONE
 	DB	1               ;motor delay between steps
 	DB	145
 	DB	FFH     ; end
-
+;
 ; danger sleep
 Tbl2_M234:                              ;SG DONE
 	DB	10               ;motor delay between steps
 	DB	10
 	DB	FFH        ; end
-
+;
 Tbl2_M235:                            ;SG DONE
 ;;; page 274 end
 ;;; page 275 start complete; FURBY27.INC page 150
@@ -9312,7 +9401,7 @@ Tbl2_M236:
 
 Tbl2_M237:                       ;SG DONE    ;SICK2
 	DB	100              ;motor delay between steps
-;DB	133,140,140,150,150,180,133
+	;DB	133,140,140,150,150,180,133
 	DB	133,140,0,150,0,180,133
 	DB	FFH         ;end
 ;
@@ -9333,13 +9422,13 @@ Tbl2_M240:                       ;SG DONE
 ;
 Tbl2_M241:                       ;SG DONE
 	DB	1              ;motor delay between steps
-;DB	124,133,120,133,115,115,0,0,133
+	;DB	124,133,120,133,115,115,0,0,133
 	DB	124,133,120,133,115,0,0,0,133
 	DB	FFH         ;end
 ;
 Tbl2_M242:                       ;SG DONE
 	DB	50              ;motor delay between steps
-;DB	115,70,120,120,133
+	;DB	115,70,120,120,133
 	DB	115,70,120,0,133
 	DB	FFH         ;end
 ;
@@ -9497,7 +9586,7 @@ Tbl3_M271:
 Tbl3_M272:
 	DB	1               ;motor delay between steps
 	DB	150,133,0,0,0,159,133,150,0,0,133
-	DB	145,137,114,133,117,125,117,133
+	DB	145,137,144,133,117,125,117,133
 	DB	FFH     ;end DONE
 
 Tbl3_M273:
@@ -9514,7 +9603,9 @@ Tbl3_M274:
 
 Tbl3_M275:
 	DB	10           ;motor delay between steps
-	DB	150,133,0,0,0,150,0,0,0,133,0,120,133,120,133,155,0,0,0,0,133
+;;;<	DB	150,133,0,0,0,150,0,0,0,133,0,120,133,120,133,155,0,0,0,0,133
+;;;>	DB
+;;;>150,133,0,0,0,150,0,0,0,133,0,120,133,120,133,155,0,0,0,0,133
 	DB	FFH   ;end
 
 Tbl3_M276:
@@ -9540,7 +9631,7 @@ Tbl3_M279:
 
 Tbl3_M280:
 	DB	10             ;motor delay between steps
-	DB	153,133,0,0,0,116,0,0,0,133,190,155,0,0,0,133
+	DB	150,133,0,0,0,116,0,0,0,133,190,155,0,0,0,133
 	DB	FFH    ; end
 
 Tbl3_M281:
@@ -9592,7 +9683,9 @@ Tbl3_M289:
 	DB	1                ;motor delay between steps
 	DB	145,155,133,0,0,0,0,120,115,133,150,133
 	DB	160,0,0,0,0,190,0,0,0,0,0,0,0,0,0,133
-	DB	0,0,0,0,0,0,0,0,0,0,133       ;SEQ8 AGE4/SEQ 16 AGE 4 INVERT js
+;;;<	DB	0,0,0,0,0,0,0,0,0,0,133       ;SEQ8 AGE4/SEQ 16 AGE 4 INVERT js
+;;;>	DB	0,0,0,0,0,0,0,0,0,0,133       ;SEQ8 AGE4/SEQ 16 AGE 4
+;;;>INVERT js
 	DB	FFH   ;end
 ;END GEORGE 07/08/98
 ;END DARK
@@ -9613,7 +9706,7 @@ Tbl3_M291:
 	DB	0,0,0,70,0,0,0,0       ;S2-A1/S10-A1/S2-A2 SOUND js
 	DB	0,0,100,0,0,0,133      ;S10-A2/S2-A3/S10-A3 SOUND js
 	DB	FFH     ;end           ;S2-A4 SOUND js
-
+;
 Tbl3_M292:
 	DB	1               ;motor delay between steps
 	DB	110,0,0,133,0,0,0,0
@@ -9675,13 +9768,19 @@ Tbl3_M299:
 ;
 Tbl3_M300:
 	DB	1              ;motor delay between steps
-	DB	165,0,0,0,190,0,0        ;S5-A2/S13-A2 SOUND (with say/m2) js
-	DB	0,0,165,0,0,0,0,133      ;S5-A3/S13-A3 SOUND (with say/m2) js
+;;;<	DB	165,0,0,0,190,0,0        ;S5-A2/S13-A2 SOUND (with say/m2) js
+;;;<	DB	0,0,165,0,0,0,0,133      ;S5-A3/S13-A3 SOUND (with say/m2) js
+;;;>	DB	165,0,0,0,190,0,0        ;S5-A2/S13-A2 SOUND (with
+;;;>say/m2) js
+;;;>	DB	0,0,165,0,0,0,0,133      ;S5-A3/S13-A3 SOUND (with
+;;;>say/m2) js
 	DB	FFH     ;end             ;S5-A4 SOUND (with say/m2) js
 ;
 Tbl3_M301:
 	DB	1              ;motor delay between steps
-	DB	115,0,0,0,0,145,0,0,165        ;S7-A2/S15-A2 SOUND (with say/m2) js
+;;;<	DB	115,0,0,0,0,145,0,0,165        ;S7-A2/S15-A2 SOUND (with say/m2) js
+;;;>	DB	115,0,0,0,0,145,0,0,165        ;S7-A2/S15-A2 SOUND (with
+;;;>say/m2) js
 	DB	0,0,190,165,0,0,0,133
 	DB	FFH   ;end
 ;
@@ -9749,7 +9848,7 @@ Tbl3_M309:
 ;TILT
 Tbl3_M310:
 	DB	1               ;motor delay between steps
-;DB	170,170,0,0,0
+	;DB	170,170,0,0,0
 	DB	170,0,0,0,0
 	DB	0,0,0,0,133           ;S1 A1/S4 A1/S2 A4 TILT js
 	DB	FFh
@@ -9781,11 +9880,15 @@ Tbl3_M316:
 	DB	1               ;motor delay between steps
 	DB	145,133,145,160,145,160
 	DB	0,0,0,0,0,0,190,0,0,0,0,0
-	DB	0,0,0,0,0,0,0,150,133          ;S8 A1 TILT (with say/m5) js
+;;;<	DB	0,0,0,0,0,0,0,150,133          ;S8 A1 TILT (with say/m5) js
+;;;>	DB	0,0,0,0,0,0,0,150,133          ;S8 A1 TILT (with say/m5)
+;;;>js
 	DB	FFh
 Tbl3_M317:
 	DB	10             ;motor delay between steps
-	DB	160,0,0,0,0,0,0,0,190,133          ;S9 A1 TILT/S9 A2 TILT js
+;;;<	DB	160,0,0,0,0,0,0,0,190,133          ;S9 A1 TILT/S9 A2 TILT js
+;;;>	DB	160,0,0,0,0,0,0,0,190,133          ;S9 A1 TILT/S9 A2 TILT
+;;;>js
 	DB	FFh
 Tbl3_M318:
 	DB	10             ;motor delay between steps
@@ -9808,7 +9911,7 @@ Tbl3_M320:
 
 Tbl3_M321:
 	DB	1                 ;motor delay between steps
-;DB	200,170,170,0,0,0,0,133     ;S13 A1 / S15 A3 TILT js
+	;DB	200,170,170,0,0,0,0,133     ;S13 A1 / S15 A3 TILT js
 
 	DB	200,170,0,0,0,0,0,133       ;S13 A1 / S15 A3 TILT js
 	DB	FFh
@@ -9824,7 +9927,9 @@ Tbl3_M323:
 	DB	FFh
 Tbl3_M324:
 	DB	1              ;motor delay between steps
-	DB	170,160,0,0,0,0,0,133    ;S1 A2/S3 A2/S1 A3/S1 A4 TILT js
+;;;<	DB	170,160,0,0,0,0,0,133    ;S1 A2/S3 A2/S1 A3/S1 A4 TILT js
+;;;>	DB	170,160,0,0,0,0,0,133    ;S1 A2/S3 A2/S1 A3/S1 A4 TILT
+;;;>js
 	DB	FFh
 Tbl3_M325:
 	DB	10            ;motor delay between steps
@@ -9844,7 +9949,7 @@ Tbl3_M327:
 ;
 Tbl3_M328:
 	DB	1               ;motor delay between steps
-	DB	145,0,0,160,0.0,0,0
+	DB	145,0,0,160,0,0,0,0
 	DB	0,0,0,0,0,0,133           ;S8 A2 TILT (with say/m5)     js
 	DB	FFH   ;end
 ;
@@ -9923,34 +10028,46 @@ Tbl3_M339:
 Tbl3_M340:
 	DB	1              ;motor delay between steps
 	DB	0,0,0,110,0,0
-	DB	115,0,0,0,0,0,0,133      ;S9 A3/S9 A4 TILT (with say/m9) js
+;;;<	DB	115,0,0,0,0,0,0,133      ;S9 A3/S9 A4 TILT (with say/m9) js
+;;;>	DB	115,0,0,0,0,0,0,133      ;S9 A3/S9 A4 TILT (with say/m9)
+;;;>js
 	DB	FFH     ;end
 ;
 Tbl3_M341:
 	DB	10               ;motor delay between steps
 	DB	165,0,0,0,0,0,0,0,0
-	DB	0,0,190,180,190,133     ;S10 A3/S10 A4 TILT (with say/ml6)js
+;;;<	DB	0,0,190,180,190,133     ;S10 A3/S10 A4 TILT (with say/ml6)js
+;;;>	DB	0,0,190,180,190,133     ;S10 A3/S10 A4 TILT (with
+;;;>say/ml6)js
 	DB	FFH     ;end
 ;
 Tbl3_M342:
 	DB	1               ;motor delay between steps
-	DB	143,118,0,0,0,0,0,133    ;S11 A3/S15 A4 TILT (with say/m2&34)js
+;;;<	DB	143,118,0,0,0,0,0,133    ;S11 A3/S15 A4 TILT (with say/m2&34)js
+;;;>	DB	143,118,0,0,0,0,0,133    ;S11 A3/S15 A4 TILT (with
+;;;>say/m2&34)js
 	DB	FFH       ;end
 ;
 Tbl3_M343:
 	DB	1              ;motor delay between steps
-	DB	145,150,145,160,133          ;S12 A3 TILT (with say/m5) js
+;;;<	DB	145,150,145,160,133          ;S12 A3 TILT (with say/m5) js
+;;;>	DB	145,150,145,160,133          ;S12 A3 TILT (with say/m5)
+;;;>js
 	DB	FFH     ;end
 ;
 Tbl3_M344:
 	DB	10               ;motor delay between steps
 	DB	148,155,0,0,0,0,138,148,155
-	DB	0,0,0,0,133,125,120,115,133     ;S16 A3 TILT (with say/m5)js
+;;;<	DB	0,0,0,0,133,125,120,115,133     ;S16 A3 TILT (with say/m5)js
+;;;>	DB	0,0,0,0,133,125,120,115,133     ;S16 A3 TILT (with
+;;;>say/m5)js
 	DB	FFH     ;end
 ;
 Tbl3_M345:
 	DB	1              ;motor delay between steps
-	DB	155,0,0,120,0,0,0,0,133      ;S3 A4 TILT (with say/m26) js
+;;;<	DB	155,0,0,120,0,0,0,0,133      ;S3 A4 TILT (with say/m26) js
+;;;>	DB	155,0,0,120,0,0,0,0,133      ;S3 A4 TILT (with say/m26)
+;;;>js
 	DB	FFH     ;end
 ;
 Tbl3_M346:
@@ -10008,7 +10125,9 @@ Tbl3_M353:
 ;
 Tbl3_M354:
 	DB	1               ;motor delay between steps
-	DB	133,145,155,190,133,155,175,145,133  ;SEQ6 (DO DO DO) ir AGE1
+;;;<	DB	133,145,155,190,133,155,175,145,133  ;SEQ6 (DO DO DO) ir AGE1
+;;;>	DB	133,145,155,190,133,155,175,145,133  ;SEQ6 (DO DO DO) ir
+;;;>AGE1
 	DB	FFh
 Tbl3_M355:
 	DB	8              ;motor delay between steps
@@ -10021,7 +10140,9 @@ Tbl3_M356:
 	DB	FFh                   ;empty space
 Tbl3_M357:
 	DB	1              ;motor delay between steps
-	DB	120,115,110,105,100,80,100,120,115,100,45,133      ;seq8 ir age1
+;;;<	DB	120,115,110,105,100,80,100,120,115,100,45,133      ;seq8 ir age1
+;;;>	DB	120,115,110,105,100,80,100,120,115,100,45,133      ;seq8
+;;;>ir age1
 	DB	FFh
 Tbl3_M358:
 	DB	10            ;motor delay between steps
@@ -10032,31 +10153,43 @@ Tbl3_M359:
 ;;; page 287 start complete; FURBY27.INC page 162
 	DB	1              ;motor delay between steps
 	DB	115,133,140,145,133,160,180
-	DB	173,167,160,180,173,167,160,140,145,133        ;seq10,11 ir age1
+;;;<	DB	173,167,160,180,173,167,160,140,145,133        ;seq10,11 ir age1
+;;;>	DB	173,167,160,180,173,167,160,140,145,133        ;seq10,11 ir
+;;;>age1
 	DB	FFh
 Tbl3_M360:
 	DB	1             ;motor delay between steps
 	DB	120,107,122,113,100,75,90,80,88,100,0,0,133
 	DB	120,107,122,113,100,75,90,80,88,100,0,133
-	DB	146,140,155,133                             ;seq12 ir age1
+;;;<	DB	146,140,155,133                             ;seq12 ir age1
+;;;>	DB	146,140,155,133                             ;seq12 ir
+;;;>age1
 	DB	FFh
 
 Tbl3_M361:
 	DB	5               ;motor delay between steps
-	DB	115,125,100,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	DB	0,0,0,0,0,0,0,0,0.0,75,80,85,90,95,100,115
-	DB	110,118,100,0,133                           ;seq13,14 ir age1
+;;;<	DB	115,125,100,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+;;;>	DB
+;;;>115,125,100,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	DB	0,0,0,0,0,0,0,0,0,0,75,80,85,90,95,100,115
+;;;<	DB	110,118,100,0,133                           ;seq13,14 ir age1
+;;;>	DB	110,118,100,0,133                           ;seq13,14 ir
+;;;>age1
 	DB	FFh
 
 Tbl3_M362:
 	DB	10
-	DB	160,0,0,190,160,0,0,133,100,0,0,0,133            ;seq15 ir age1
+;;;<	DB	160,0,0,190,160,0,0,133,100,0,0,0,133            ;seq15 ir age1
+;;;>	DB	160,0,0,190,160,0,0,133,100,0,0,0,133            ;seq15 ir
+;;;>age1
 	DB	FFh
 
 ; DANGER SLEEP
 Tbl3_M363:
 	DB	90        ;10              ;motor delay between steps
-	DB	85,40,30,85,40,30,0,85,40,30,0,85,40,30,10  ;seq16 ir age1
+;;;<	DB	85,40,30,85,40,30,0,85,40,30,0,85,40,30,10  ;seq16 ir age1
+;;;>	DB	85,40,30,85,40,30,0,85,40,30,0,85,40,30,10  ;seq16 ir
+;;;>age1
 	DB	FFh
 Tbl3_M364:
 	DB	1             ;motor delay between steps
@@ -10064,18 +10197,20 @@ Tbl3_M364:
 	DB	FFh
 Tbl3_M365:
 	DB	10              .-motor delay between steps
-	DB	125,113.125,118,105,133   ;SEQ4,5 IR AGE2
+	DB	125,113,125,118,105,133   ;SEQ4,5 IR AGE2
 	DB	FFh
 
 
 Tbl3_M366:
 	DB	10             ;motor delay between steps
-	DB	145,155,140,145,142,150,0,0,0,0,0,0,0,133              ;seq6 ir age2
+;;;<	DB	145,155,140,145,142,150,0,0,0,0,0,0,0,133              ;seq6 ir age2
+;;;>	DB	145,155,140,145,142,150,0,0,0,0,0,0,0,133              ;seq6
+;;;>ir age2
 	DB	FFh
 Tbl3_M367:
 	DB	5               ;motor delay between steps
 	DB	10,40,10,40,133,143,140,145,143,145
-;DB	133
+	;DB	133
 	DB	100,133
 	DB	125,113,133                        ;seq7,8 ir age 2
 	DB	125,113,133                        ;seq7,8 ir age 2
@@ -10085,21 +10220,28 @@ Tbl3_M368:
 	DB	10            ;motor delay between steps
 ;;; page 287 end
 ;;; page 288 start complete; FURBY27.INC page 163
-	DB	125,115,105,0,0,133,145,143,155,133,100,133           ;seq9 ir age2
+;;;<	DB	125,115,105,0,0,133,145,143,155,133,100,133           ;seq9 ir age2
+;;;>	DB	125,115,105,0,0,133,145,143,155,133,100,133           ;seq9
+;;;>ir age2
 	DB	FFh
 ;
 Tbl3_M369:
 	DB	1              ;motor delay between steps
 	DB	125,120,115,113,110,105,123,108
-;DB	123,115,110,100,100,100,100,0,0,0,0,0,0,0,0,133
-;seq1O ir age2
+;;;<	;DB	123,115,110,100,100,100,100,0,0,0,0,0,0,0,0,133 ;seq10 ir age2
+;;;>	;DB	123,115,110,100,100,100,100,0,0,0,0,0,0,0,0,133
+;;;>;seq10 ir age2
 
-	DB	123,115,110,100,0,0,0,0,0,0,0,0,0,0,0,133   ;seq1O ir age2
+;;;<	DB	123,115,110,100,0,0,0,0,0,0,0,0,0,0,0,133   ;seq10 ir age2
+;;;>	DB	123,115,110,100,0,0,0,0,0,0,0,0,0,0,0,133   ;seq10 ir
+;;;>age2
 	DB	FFH     ;end
 ;
 Tbl3_M370:
 	DB	1              ;motor delay between steps
-	DB	125,119,113,120,113,140,150,133                 ;seq11 ir age2
+;;;<	DB	125,119,113,120,113,140,150,133                 ;seq11 ir age2
+;;;>	DB	125,119,113,120,113,140,150,133                 ;seq11
+;;;>ir age2
 	DB	FFH    ;end
 ;
 Tbl3_M371:
@@ -10162,7 +10304,9 @@ Tbl3_M380:
 ;
 Tbl3_M381:
 	DB	5             ;motor delay between steps
-	DB	120,150,110,0,0,0,133               ;seq1,2,3,4,5 ir age4
+;;;<	DB	120,150,110,0,0,0,133               ;seq1,2,3,4,5 ir age4
+;;;>	DB	120,150,110,0,0,0,133               ;seq1,2,3,4,5 ir
+;;;>age4
 	DB	FFH     ; end
 ;
 Tbl3_M382:
@@ -10179,14 +10323,18 @@ Tbl3_M383:
 Tbl4_M384:
 	DB	1              ;motor delay between steps
 	DB	115,133,143,148,136,160,180
-	DB	173,167,160,180,173,167,160,140,145,133      ;seq9 ir age4
+;;;<	DB	173,167,160,180,173,167,160,140,145,133      ;seq9 ir age4
+;;;>	DB	173,167,160,180,173,167,160,140,145,133      ;seq9 ir
+;;;>age4
 	DB	FFH      ;end
 ;
 Tbl4_M385:
 	DB	1               ;motor delay between steps
 	DB	118,0,0,155,0,0,133,0,0,118,0,133,0,0,0,0,110
 	DB	0,0,0,133,120,107,122,113,100,75,90,80,88,100,133
-	DB	FFH     ;end   SAY NUMBERS MODIFIED TO MATCH CORRECT DIALOGUE
+;;;<	DB	FFH     ;end   SAY NUMBERS MODIFIED TO MATCH CORRECT DIALOGUE
+;;;>	DB	FFH     ;end   SAY NUMBERS MODIFIED TO MATCH CORRECT
+;;;>DIALOGUE
 ;
 Tbl4_M386:
 	DB	1              ;motor delay between steps
@@ -10316,20 +10464,20 @@ Tbl4_M409:
 	DB	FFH   ;end
 ;
 Tbl4_M410:
-	DB	1                  ;motoe delay between steps
+	DB	1                  ;motor delay between steps
 	DB	10                    ; sleep
 	DB	FFH        ;end
 ;
 Tbl4_M411:                          ; PEEK-BOO (HIDE AND SEEK) DHM
 	DB	20              ;MOTOR DELAY BETWEEN STEPS
-	DB	155.133,0,0,147,133
+	DB	155,133,0,0,147,133
 	DB	FFh
 ;
 ;;; page 291 end
 ;;; page 292 start complete; FURBY27.INC page 167
 Tbl4_M412:                         ; feed dmh
 	DB	1           ;motor delay between steps
-	DB	165,0,0,0,0,0.0.150,0,0,165,0,0,0,0,0,0,150 ; (AAAAH)
+	DB	165,0,0,0,0,0,0,150,0,0,165,0,0,0,0,0,0,150 ; (AAAAH)
 	DB	0,0,165,0,0,0,0,0,0,133 ;(AAAAH)
 	DB	FFH   ;end
 ;
