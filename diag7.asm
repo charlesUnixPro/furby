@@ -130,7 +130,7 @@ EEdone:
 ;;; page 118 start complete; DIAG7 page 3
 	CLI			;enable IRQ
 	JSR	Kick_IRQ		;wait for timer to re-sync
-	JSR	TI_reset	i	;clear TI from ?????????
+	JSR	TI_reset		;clear TI from ?????????
 
 	LDA	Feed_count	;get lo byte of macro to call
 	JSR	Diag_macro	;go send motor/speech
