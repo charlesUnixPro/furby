@@ -37,38 +37,68 @@
 ;;; XXX 
 ;;; XXX
 ;;; page 001 start complete
-;*******************************************************************************
+;;;<;+-----------------------------------------------------------------------------+
+;;;<;|                                                                             |
+;;;<;|	SPC81A Source Code   (Version 25)                                    |
+;;;<;|                                                                             |
+;;;<;|                                                                             |
+;;;<;|	Written by: Dave Hampton / Wayne Schulz                              |
+;;;<;|                                                                             |
+;;;<;|	Date:       July 30, 1998                                            |
+;;;<;|                                                                             |
+;;;<;|	Copyright  (C) 1996,1997,1998 by Sounds Amazing!                     |
+;;;<;|                                                                             |
+;;;<;|	All rights reserved                                                  |
+;;;<;|                                                                             |
+;;;<;+-----------------------------------------------------------------------------+
+;;;>;EIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+;;;>IIII>
+;;;>;*
+;;;>*
+;;;>;*      SPC81A Source Code   (Version 25)
+;;;>*
+;;;>;*
+;;;>*
+;;;>;*      Written by: Dave Hampton / Wayne Schulz
+;;;>*
+;;;>;*      Date:       July 30, 1998
+;;;>*
+;;;>;*
+;;;>*
+;;;>;*      Copyright   (C)   1996,1997,1998 by Sounds Amazing!
+;;;>*
+;;;>;*      All rights reserved.
+;;;>*
+;;;>;EIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+;;;>IIII#
 ;
-;	SPC81A Source Code   (Version 25)
 ;
-;
-;	Written by: Dave Hampton / Wayne Schulz
-;
-;	Date:       July 30, 1998
-;
-;	Copyright  (C) 1996,1997,1998 by Sounds Amazing!
-;
-;	All rights reserved
-;
-;*******************************************************************************
-;
-;
-;*******************************************************************************
+;**********************************************************************
+
 
 ;  remember    SBC   if there is a borrow carry is CLEARED
-;  also SBC    if the two numbers are equal you still get a negative result
+;;;<;  also SBC    if the two numbers are equal you still get a negative result
+;;;>;  also SBC    if the two numbers are equal you still get a negative
+;;;>result
 
 ;
 ;
-;*******************************************************************************
-;   MODIFICATION LIST
+;;;<;+-----------------------------------------------------------------------------+
+;;;<;|   MODIFICATION LIST
+;;;<;|
+;;;>;EIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+;;;>IIII>
+;;;>;*   MODIFICATION LIST :
+;;;>*
 ;
 
 ; Furby29/30/31/32
 ;     Final testing for shipment of code on 8/2/98.
 ;     Tables updated, motor speed updated, wake up/name fix
 ;     sequential tables never getting first entry,fixed.
-;     New diag5.asm, Light3.asm (if light osc stalls it wont hang system).
+;;;<;     New diag5.asm, Light3.asm (if light osc stalls it wont hang system).
+;;;>;     New diag5.asm, Light3.asm (if light osc stalls it wont hang
+;;;>system).
 ;
 ; Furby33
 ;     In motor brake routine, turn motors off before turning reverse
@@ -83,17 +113,24 @@
 ;    Adds four new easter eggs,BURP ATTACK, SAY NAME, TWINkLE SONG,
 ;    and ROOSTER LOVES YOU. Also add new names.
 ;
-;*******************************************************************************
+;
+;
+;;;<;-------------------------------------------------------------------------------
+;;;>;::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ;;; page 001 end
 ;;; page 002 start complete
 ; Release 3
 
 ;; File "testR3a"
 
-; 1. Light sensor has a hysteresis point of continually triggering sensor.
+;;;<; 1. Light sensor has a hysteresis point of continually triggering sensor.
+;;;>; 1. Light sensor has a hysteresis point of continually triggering
+;;;>sensor.
 ; 2. Light sensor decrements two instead of one on hungry counter
-; 3. Diagnosis mode for light sensor wont trigger very easily.
-; 4. When a furby receives the I.R. sleep command he sends the same command
+; 3. Diagnostic mode for light sensor wont trigger very easily.
+;;;<; 4. When a furby receives the I.R. sleep command he sends the same command
+;;;>; 4. When a furby receives the I.R. sleep command he sends the same
+;;;>command
 ;    out before going to sleep.
 ;
 ; 5. When hungry is low enough to trigger sick counter, each sensor
@@ -111,9 +148,13 @@
 ; 9. Change sick/hungry counter so that it can only get so sick and
 ;    not continue down to zero. (MAX_SICK)
 
-;10. In diagnostics, motor position test ,,,, first goes forward continuously
+;;;<;10. In diagnostics, motor position test ,,,, first goes forward continuously
+;;;>;10. In diagnostics, motor position test ,,,, first goes forward
+;;;>continuously
 ;    until the front switch is pressed, then goes reverse continuously
-;    until the front switch is pressed again, and then does normal position
+;;;<;    until the front switch is pressed again, and then does normal position
+;;;>;    until the front switch is pressed again, and then does normal
+;;;>position
 ;    calibration stopping at the calibration switch.
 
 ;11. On power up we still use tilt and invert to generate startup random
@@ -129,8 +170,13 @@
 ;    we goto deep sleep. That means only the invert can wake us up, not 
 ;    the tilt switch.
 
-;
-;**************************************************************************
+
+;;;<;|                                                                             |
+;;;<;-------------------------------------------------------------------------------
+;;;>;°
+;;;>°
+;;;>;EÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+;;;>ÍÍÍÍÍÍÍ
 ;**************************************************************************
 ;**************************************************************************
 ;**************************************************************************
@@ -145,7 +191,6 @@
 ;  bit 6 set = select music pitch table
 ;        clr = select normal speech pitch table
 ;  bit 0-5 value to change course value (no change = 0)
-;
 
 ; A math routine in 'say_0' converts the value for + or -
 ; if <80 then subtracts from 80 to get the minus version of 00
@@ -162,7 +207,9 @@
 ; 2Fh lo voice ( very low)
 
 
-; The math routine in 'Say_0' allows a +-decimal number in the speech table.
+;;;<; The math routine in 'Say_0' allows a +-decimal number in the speech table.
+;;;>; The math routine in 'Say_0' allows a +-decimal number in the speech
+;;;>table.
 ; A value of 80 = no change or 00 sent to TI
 ; 81 = +1
 ; 8f = +16
@@ -179,16 +226,25 @@ Voice2		EQU	7Ah	;(-6) mid voice
 Voice3		EQU	71h	;(-15) low voice
 
 
-;;;; we converted to a random selection table, but since all voice tables
+;;;<;;;; we converted to a random selection table, but since all voice tables
+;;;>;;;; we converted to a random selection table, but since all voice
+;;;>tables
 ;    use the equates plus some offset, we made the change in the SAY_0
 ;    routine. We always assign voice 3 which is the lowest, and based on
-;    the random power up pitch selection, the ram location 'Rvoice' holds
-;    the number to add to the voice+offset received from the macro table.
+;;;<;    the random power up pitch selection, the ram location 'Rvoice' holds
+;;;>;    the random power up pitch selection, the ram location 'Rvoice'
+;;;>holds
+;;;<;    the number to add to the voice+offset received from the macro table.
+;;;>;    the number to add to the voice+offset received from the macro
+;;;>table.
 
+;;;<Voice	EQU	Voice3		;pitch (choose Voice1, Voice2, Voice3) (voice2=norm)
+;;;>Voice	EQU	Voice3		;pitch (choose Voice1, Voice2,
+;;;>Voice3) (voice2=norm)
 
-Voice	EQU	Voice3		;pitch (choose Voice1, Voice2, VOice3) (voice2=norm)
-
-; Select Voice3 since it is the lowest and then add the difference to get
+;;;<; Select Voice3 since it is the lowest and then add the difference to get
+;;;>; Select Voice3 since it is the lowest and then add the difference to
+;;;>get
 ; Voice2 or Voice3. Here we assign that difference to an equate to be
 ; used in the voice table that is randomly selected on power up.
 
@@ -207,7 +263,7 @@ S_voice3	EQU	0	;Voice3 + 00d = Voice3
 
 Mpulse_on	EQU	16	;
 Mpulse_off	EQU	16	;
-
+;;;
 Cal_pos_fwd	EQU	134	;calibration switch forward direction
 Cal_pos_rev	EQU	134	;calibration switch forward direction
 
@@ -305,7 +361,9 @@ Ports_dir	EQU	00	; (write only)
 ; you can't control each pin separately, only as a nibble
 ; 0 = input / 1 = output
 ;
-; 7      6      5      4      3      2      1     0      (REGISTER BITS)
+;;;<; 7      6      5      4      3      2      1     0      (REGISTER BITS)
+;;;>; 7      6      5      4      3      2      1     0      (REGISTER
+;;;>BITS)
 ; D      D      C      C      B      B      A     A      (PORT)
 ; 7654   3210   7654   3210   7654   3210   7654  3210   (PORT BITS)
 ;-------------------------------------------------------------------------------
@@ -318,7 +376,9 @@ Ports_dir	EQU	00	; (write only)
 Ports_con	EQU	01	; (write only)
 ;
 ; (4 I/O pins) controlled with each bit of this register
-; 7      6      5      4      3      2      1     0      (REGISTER BITS)
+;;;<; 7      6      5      4      3      2      1     0      (REGISTER BITS)
+;;;>; 7      6      5      4      3      2      1     0      (REGISTER
+;;;>BITS)
 ; D      D      C      C      B      B      A     A      (PORT)
 ; 7654   3210   7654   3210   7654   3210   7654  3210   (PORT BITS)
 
@@ -351,7 +411,9 @@ Ports_con	EQU	01	; (write only)
 
 ;----------------- I/O PORTS ---------------------------------------------------
 
-Port_A		EQU	02H 	; (read/write) for TI & speech recgn CPU's
+;;;<Port_A		EQU	02H 	; (read/write) for TI & speech recgn CPU's
+;;;>Port_A		EQU	02H 	; (read/write) for TI & speech recgn
+;;;>CPU's
 Data_D0		EQU	01H	; bit 0 data nible port
 Data_D1		EQU	02H	;
 Data_D2		EQU	04H	;
@@ -444,9 +506,15 @@ Interrupts	EQU	0DH	; (read/write)
 ;        m = (0=Timer A generates NMI INT, 1=Timer A generates IRQ INT)
 ;        a = (0=Timer A interrupt off, 1=Timer A interrupt on)
 ;        b = (0=Timer B interrupt off, 1=Timer B interrupt on)
-;        3 = (0=CPU CLK/1024 interrupt off,  1=CPU CLK/1024 interrupt on)
-;        2 = (0=CPU CLK/8192 interrupt off,  1=CPU CLK/8192 interrupt on)
-;        1 = (0=CPU CLK/65536 interrupt off,  1=CPU CLK/65536 interrupt on)
+;;;<;        3 = (0=CPU CLK/1024 interrupt off,  1=CPU CLK/1024 interrupt on)
+;;;<;        2 = (0=CPU CLK/8192 interrupt off,  1=CPU CLK/8192 interrupt on)
+;;;<;        1 = (0=CPU CLK/65536 interrupt off,  1=CPU CLK/65536 interrupt on)
+;;;>;        3 = (0=CPU CLK/1024 interrupt off,  1=CPU CLK/1024 interrupt
+;;;>on)
+;;;>;        2 = (0=CPU CLK/8192 interrupt off,  1=CPU CLK/8192 interrupt
+;;;>on)
+;;;>;        1 = (0=CPU CLK/65536 interrupt off,  1=CPU CLK/65536 interrupt
+;;;>on)
 ;        e = (0=external interrupt off, 1=external interrupt on)
 ;             rising edge, from port_c bit 1
 ;-------------------------------------------------------------------------------
@@ -455,14 +523,22 @@ Interrupts	EQU	0DH	; (read/write)
 ; There are two 12bits timers.
 ; Timer A can be either a timer or a counter. (as set by TIMER_CON)
 ; Timer B can only be used as a timer.
-;
+;  *
 ; Timers count-up and on overflow from 0FFF to 0000, this carry bit will
-; create an interrupt if the corresponding bit is set in INTERRUPTS register.
-; The timer will be auto reloaded with the user setup value, and start,,,
+;;;<; create an interrupt if the corresponding bit is set in INTERRUPTS register.
+;;;>; create an interrupt if the corresponding bit is set in INTERRUPTS
+;;;>register.
+;;;<; The timer will be auto reloaded with the user setup value, and start,,,
+;;;>; The timer will be auto reloaded with the user setup value, and
+;;;>start,,,
 ; count-up again.
 ;
-; Counter will reset by user loading #00 into register TMA_LSB and TMA_MSB.
-; Counter registers can be read on-the-fly, this will not affect register,,,
+;;;<; Counter will reset by user loading #00 into register TMA_LSB and TMA_MSB.
+;;;>; Counter will reset by user loading #00 into register TMA_LSB and
+;;;>TMA_MSB.
+;;;<; Counter registers can be read on-the-fly, this will not affect register,,,
+;;;>; Counter registers can be read on-the-fly, this will not affect
+;;;>register,,,
 ; values, or reset them.
 ;
 
@@ -554,12 +630,18 @@ DAC_ctrl	EQU	16H
 
 ;/* here is some definition chnge of time interrupt constant */Tracker
 
-;SystemClock:	EQU	6000000	;Select 6000000Hz it will be the same
+;;;<;SystemClock:	EQU	6000000	;Select 6000000Hz it will be the same
+;;;>;SystemClock:	EQU	6000000	;Select 6000000Hz it will be the
+;;;>same
 				;as before
-SystemClock:	EQU	3579545	;Select 3579545Hz while we are use that
+;;;<SystemClock:	EQU	3579545	;Select 3579545Hz while we are use that
+;;;>SystemClock:	EQU	3579545	;Select 3579545Hz while we are
+;;;>use that
 				;crystal
 
-TimeA_low:	EQU	<(4096-(SystemClock/5859))	;put constant definition
+;;;<TimeA_low:	EQU	<(4096-(SystemClock/5859))	;put constant definition
+;;;>TimeA_low:	EQU	<(4096-(SystemClock/5859))	;put constant
+;;;>definition
 TimeA_hi:	EQU	>(4096-(SystemClock/5859))
 
 TimeB_low:	EQU	<(4096-(SystemClock/1465))
@@ -583,10 +665,16 @@ Intt_dflt	EQU	D0H	;sets interrupt reg = no watchdog,irq
 ;*******************************************************************************
 ;;; page 010 end
 ;;; page 011 start complete
-; Send a braking pulse to stop motor drift, and this EQU is a decimal number
-; that determines how many time through the 2.9 mSec loop (how many loops)
+;;;<; Send a braking pulse to stop motor drift, and this EQU is a decimal number
+;;;>; Send a braking pulse to stop motor drift, and this EQU is a decimal
+;;;>number
+;;;<; that determines how many time through the 2.9 mSec loop (how many loops)
+;;;>; that determines how many time through the 2.9 mSec loop (how many
+;;;>loops)
 ; the brake pulse is on. If attempting to make single count jumps, the
-; brake pulse needs to be between 26 and 30. For any jump greater than 10
+;;;<; brake pulse needs to be between 26 and 30. For any jump greater than 10
+;;;>; brake pulse needs to be between 26 and 30. For any jump greater than
+;;;>10
 ; braking between 22 and 80 is acceptable. ( Long jumps are not critical
 ; but short jump will begin to oscillate if braking is too great.)
 
@@ -598,9 +686,13 @@ Drift_short	EQU	25	;
 
 ;*******************************************************************************
 
-; set this with a number from 0 - 255 to determine timeout of all sensors
+;;;<; set this with a number from 0 - 255 to determine timeout of all sensors
+;;;>; set this with a number from 0 - 255 to determine timeout of all
+;;;>sensors
 ; for the sequential increments. If it times out the table pointer
-; goes back to the start, else each trigger increments through the table.
+;;;<; goes back to the start, else each trigger increments through the table.
+;;;>; goes back to the start, else each trigger increments through the
+;;;>table.
 
 ; NOTE: this time includes the motor/speech execution time !!!
 
@@ -663,7 +755,9 @@ Ran_sick	EQU	12
 ; Each sensor also determines how often it is random or sequential
 ; as in 50/50 or 60/40 etc.
 ; These entries are subtracted from the random number generated
-; and determine the split. (the larger here, the more likely sequential pick)
+;;;<; and determine the split. (the larger here, the more likely sequential pick)
+;;;>; and determine the split. (the larger here, the more likely sequential
+;;;>pick)
 
 Tilt_split	EQU	80h	;
 Invert_split	EQU	80h	;
@@ -900,7 +994,9 @@ Init_Mspeed	EQU	08H	;bit 3 = 2nd part of motor speed test
 Train_Bk_prev	EQU	10H	;bit 4 = set when 2 back sw hit in a row
 Say_new_name	EQU	20H	;bit 5 = only happens on cold boot
 REQ_dark_sleep	EQU	40H	;bit 6 = set -dark level sends to sleep
-Dark_sleep_prev	EQU	80H	;bit 7 = if set on wake up thendont gotosleep
+;;;<Dark_sleep_prev	EQU	80H	;bit 7 = if set on wake up thendont gotosleep
+;;;>Dark_sleep_prev	EQU	80H	;bit 7 = if set on wake up thendont
+;;;>gotosleep
 ;
 Stat_1		EQU	CAH	;system status
 Word_activ	EQU	01H	;bit 0 = set during any speech
@@ -931,6 +1027,7 @@ Lt_reff		EQU	10H	;bit 4 =set for light sense reff cycle
 Motor_on		EQU	20H	;bit 5 = set=motor pulse power on
 M_forward		EQU	40H	;bit 6 =clr = move motor forward
 M_reverse		EQU	80H	;bit 7 =clr = move motor reverse
+;
 
 ;*******************************************************************************
 
@@ -1050,7 +1147,9 @@ Back_ID		EQU	EEh	;special value triggers learn mode
 ; For power on test, WE only clear ram to E9h and use EAh for a
 ; messenger to the warm boot routine. We always clear ram and initialize
 ; registers on power up, but if it is a warm boot then read EEPROM
-; and setup ram locations. Location EAH is set or cleared during power up
+;;;<; and setup ram locations. Location EAH is set or cleared during power up
+;;;>; and setup ram locations. Location EAH is set or cleared during power
+;;;>up
 ; and then the stack can use it during normal run.
 
 
@@ -1100,7 +1199,9 @@ RESET:
 ; For power on test, WE only clear ram to E9h and use EAh for a
 ; messenger to the warm boot routine. We always clear ram and initialize
 ; registers on power up, but if it is a warm boot then read EEPROM 
-; and setup ram locations. Location EAH is set or cleared during power up
+;;;<; and setup ram locations. Location EAH is set or cleared during power up
+;;;>; and setup ram locations. Location EAH is set or cleared during power
+;;;>up
 ; and then the stack can use it during normal run.
 
 
@@ -1208,7 +1309,9 @@ InitIO:
 
 Diag_macro:
 	STA	Macro_Lo	;save lo byte of Macro table entry
-	LDA	#0b8h	;#90h	;hex offset to adrs 400 added to diag call
+;;;<	LDA	#0b8h	;#90h	;hex offset to adrs 400 added to diag call
+;;;>	LDA	#0b8h	;#90h	;hex offset to adrs 400 added
+;;;>to diag call
 	CLC
 	ADC	Macro_Lo		;add in offset
 	STA	Macro_Lo		;update
@@ -1320,7 +1423,9 @@ Do_cold_boot:
 
 
 
-; On power up or reset, Furby must go select a new name ,,, ahw how cute
+;;;<; On power up or reset, Furby must go select a new name ,,, ahw how cute
+;;;>; On power up or reset, Furby must go select a new name ,,, ahw how
+;;;>cute.
 
 	JSR	Random		;
 	AND	#1Fh		;get 32 possible
@@ -1449,7 +1554,9 @@ No_zero:
 	LDA	TEMP1		;get decision
 
 	STA	IN_DAT		;save decision
-	LDA	#Wake_ID	;which ram location for learned word count (offset)
+;;;<	LDA	#Wake_ID	;which ram location for learned word count (offset)
+;;;>	LDA	#Wake_ID	;which ram location for learned word count
+;;;>(offset)
 	JSR	Start_learn	;go record training info
 	LDA	IN_DAT		;get back word to speak
 
@@ -1503,7 +1610,9 @@ No_dark_req:
 ; When any sensor or timer calls the "start_macro" routine, the
 ; Macro_Lo & Macro_Hi are saved. Everyone jumps back to Idle and when
 ; speech/motor routines are finished, this routine will look at the
-; macros that were used and execute another function if a match is found.
+;;;<; macros that were used and execute another function if a match is found.
+;;;>; macros that were used and execute another function if a match is
+;;;>found.
 ;
 ; Checks for his name first, then any IR to send, and finally, the sleep
 ; commands. THe temp macro buffers are cleared before
@@ -1571,7 +1680,9 @@ Spcl_IR2:
 	STA	Bored_timer	;
 
 	LDA	#03		;set timer
-	STA	Last_IR		;timer stops IR from hearing its own IR xmit
+;;;<	STA	Last_IR		;timer stops IR from hearing its own IR xmit
+;;;>	STA	Last_IR		;timer stops IR from hearing its own IR
+;;;>xmit
 
 	JMP	Spcl_IR_dn	;done - ola ......
 Not_IRxmit2:
@@ -1612,7 +1723,9 @@ Spcl_sleep1:
 
 ;need to wait >600 milisec before going to sleep because we arent using
 ;busy flags from TI and need to make sure it is done transmitting the
-;I.R. code, the sleep routine kills the TI and it would never send the cmnd.
+;;;<;I.R. code, the sleep routine kills the TI and it would never send the cmnd.
+;;;>;I.R. code, the sleep routine kills the TI and it would never send the
+;;;>cmnd.
 
 	LDA	#25		;how many 30 milisec cycles to call
 	JSR	Half_delay	;do 30milisec delay cycles
@@ -1995,8 +2108,12 @@ Ck_g9:
 ; Task 0 : scans all active requests from sensors looking for a trigger.
 ; If any are set then scan through the game select tables for each game
 ; looking for a match, and increment the counter each time a succesive
-; match is found. If one is not in sequence, then that counter is reset to
-; zero. Since all counters are independent, then the first one to completion
+;;;<; match is found. If one is not in sequence, then that counter is reset to
+;;;>; match is found. If one is not in sequence, then that counter is reset
+;;;>to
+;;;<; zero. Since all counters are independent, then the first one to completion
+;;;>; zero. Since all counters are independent, then the first one to
+;;;>completion
 ; wins and all others are zeroed.
 ;
 ; All sensor triggers are in one status byte so we can create a number
@@ -2018,13 +2135,23 @@ Ck_g9:
 
 ; We assign a single bit per game or egg senario. Each time a
 ; sensor is triggered, we increment the counter and test all eggs for
-; a match. If a particular sensor doesnt match, then set its disqualified
-; bit and move on. If at any time all bits are set, then clear counter to
-; zero and start over. WHen a table gets an FF then that egg is executed.
+;;;<; a match. If a particular sensor doesnt match, then set its disqualified
+;;;>; a match. If a particular sensor doesnt match, then set its
+;;;>disqualified
+;;;<; bit and move on. If at any time all bits are set, then clear counter to
+;;;>; bit and move on. If at any time all bits are set, then clear counter
+;;;>to
+;;;<; zero and start over. WHen a table gets an FF then that egg is executed.
+;;;>; zero and start over. WHen a table gets an FF then that egg is
+;;;>executed.
 ; Each time a sensor is triggered, the system timer is reset. This timer
-; called 'Sensor_timer' is reset with 'Global_time' equate. This timer is also
+;;;<; called 'Sensor_timer' is reset with 'Global_time' equate. This timer is also
+;;;>; called 'Sensor_timer' is reset with 'Global_time' equate. This timer is
+;;;>also
 ; used for the random sequential selection of sensor responses. If this
-; timer goes to zero before an egg is complete, ie, Furby has not been played
+;;;<; timer goes to zero before an egg is complete, ie, Furby has not been played
+;;;>; timer goes to zero before an egg is complete, ie, Furby has not been
+;;;>played
 ; with, then clear all disqualified bits and counters.
 
 ; Currently there are 24 possible eggs. (3 bytes)
@@ -2509,8 +2636,12 @@ Next_motor:
 ;	BNE	NMM_out		;wait til 0
 
 
-; Set a timer and ck counter 'motorstoped' (incremented with wheel count)
-; to see if it changed. When it stops changing then the motor has stopped.
+;;;<; Set a timer and ck counter 'motorstoped' (incremented with wheel count)
+;;;<; to see if it changed. When it stops changing then the motor has stopped.
+;;;>; Set a timer and ck counter 'motorstoped' (incremented with wheel
+;;;>count)
+;;;>; to see if it changed. When it stops changing then the motor has
+;;;>stopped.
 
 	LDA	motorstoped	;ck for 0
 	BNE	NMM_out		;wait till 0
@@ -2546,7 +2677,9 @@ NMM_out:
 Motor_pause:
 	LDA	Motor_lo		;check for pause request on this step (00)
 	BNE	More_motor	;more
-	JMP	Motor_killend	;set cycle timer and wait for next motor step
+;;;<	JMP	Motor_killend	;set cycle timer and wait for next motor step
+;;;>	JMP	Motor_killend	;set cycle timer and wait for next motor
+;;;>step
 ;
 ;
 ; To initialize the motor call table, the originator loads 'Which_motor'
@@ -2985,7 +3118,9 @@ Get_macro:
 
 ; Motor noise is triggering sound sensor hardware, so this sets the
 ; previously sound done flag, and the system will not respond to the
-; sound sensor until the sound trigger line goes low and clears prev done.
+;;;<; sound sensor until the sound trigger line goes low and clears prev done.
+;;;>; sound sensor until the sound trigger line goes low and clears prev
+;;;>done.
 
 	LDA	Stat_3		;system
 	ORA	#Sound_stat	;
@@ -3465,9 +3600,13 @@ Hideseek:		;table of sound when Furby is hiding & waiting to be found
 ; Furby - Says      ;;;;
 
 ; Four byte of ram allocated for game and 5th byte is game counter.
-; On start, get 4 random numbers and set the game counter to 4 sequences.
+;;;<; On start, get 4 random numbers and set the game counter to 4 sequences.
+;;;>; On start, get 4 random numbers and set the game counter to 4
+;;;>sequences.
 ; Furby plays the 4 sounds and waits for the sensors to respond. If its
-; wrong, then start over at beginning and if it is right then say whoppee
+;;;<; wrong, then start over at beginning and if it is right then say whoppee
+;;;>; wrong, then start over at beginning and if it is right then say
+;;;>whoppee
 ; and increment to 5 sounds,,,,,, until all 16. If 16 correct then get
 ; 4 new random numbers and continue with 16 sequences.
 ; The invert switch bails out of the game.
@@ -3481,7 +3620,9 @@ Simondelay_hi	EQU	#00h	;hi byte adrs 102 = 066h
 Listen_me_lo	EQU	DAh	;on start up he say “Listen Me"
 Listen_me_hi	EQU	01h	;macro 474 = 1DAh
 
-Simon_frnt_lo	EQU	#AEh	;using macro 430 for simon chooses "tickle"
+;;;<Simon_frnt_lo	EQU	#AEh	;using macro 430 for simon chooses "tickle"
+;;;>Simon_frnt_lo	EQU	#AEh	;using macro 430 for simon chooses
+;;;>"tickle"
 Simon_frnt_hi	EQU	#01h	;hi byte adrs 430 = 1AEh
 
 Simon_back_lo	EQU	#AFh	;using macro 431 for simon chooses  "pet
@@ -3986,10 +4127,12 @@ Test_all_sens:
 ;************************************************************
 ;************************************************************
 
-;***** Side wall switch triggers when ball falls off center and I/O goes hi.
-
+;;;<;***** Side wall switch triggers when ball falls off center and I/O goes hi.
+;;;>;***** Side wall switch triggers when ball falls off center and I/O goes
 ;;; page 066 end
 ;;; page 067 start complete
+;;;>hi.
+
 CK_tilt:				;tilt sensor
 	JSR	Get_Tilt		;go ck for sensor trigger
 	BCS	Normal_tilt	;go fini normal spch/motor table
@@ -4190,7 +4333,9 @@ Invrt_set:
 Invrt_rnd:
 
 	STA	IN_DAT		;save decision
-	LDA	#Invert_ID	;which ram location for learned word count (offset)
+;;;<	LDA	#Invert_ID	;which ram location for learned word count (offset)
+;;;>	LDA	#Invert_ID	;which ram location for learned word count
+;;;>(offset)
 	JSR	Start_learn	;go record training info
 	LDA	IN_DAT		;get back word to speak
 
@@ -4293,9 +4438,11 @@ Back_set:
 Back_rnd:
 
 	STA	IN_DAT		;save decision
-	LDA	#Back_ID		;which ram location for learned word count (offset)
+;;;<	LDA	#Back_ID		;which ram location for learned word count (offset)
+;;;>	LDA	#Back_ID		;which ram location for learned word count
 ;;; page 071 end
 ;;; page 072 start complete
+;;;>(offset)
 	JSR	Start_learn	;go record training info
 	LDA	IN_DAT		;get back word to speak
 
@@ -4677,7 +4824,9 @@ Feed_set:
 Feedrand:
 
 	STA	IN_DAT		;save decision
-	LDA	#Feed_ID	;which ram location for learned word count (offset)
+;;;<	LDA	#Feed_ID	;which ram location for learned word count (offset)
+;;;>	LDA	#Feed_ID	;which ram location for learned word count
+;;;>(offset)
 	JSR	Start_learn	;go record training info
 	LDA	IN_DAT		;get back word to speak
 
@@ -4767,7 +4916,9 @@ Lghtrand:
 	LDA	TEMP4		;get pointer
 
 	STA	IN_DAT		;save decision
-	LDA	#Light_ID		;which ram location for learned word count (offset)
+;;;<	LDA	#Light_ID		;which ram location for learned word count (offset)
+;;;>	LDA	#Light_ID		;which ram location for learned word count
+;;;>(offset)
 	JSR	Start_learn	;go record training info
 	LDA	IN_DAT		;get back word to speak
 
@@ -4842,7 +4993,9 @@ Ck_snd3:
 	BEQ	Snd_over		;jump if rolled over +3
 	LDA	Port_D		;get I/O  +2
 	AND	#Mic_in		;ck if still hi +2
-	BNE	Ck_snd3		;loop till lo +3 (15*166ns=2.49uS)
+;;;<	BNE	Ck_snd3		;loop till lo +3 (15*166ns=2.49uS)
+;;;>	BNE	Ck_snd3		;loop till lo +3
+;;;>(15*166ns=2.49uS)
 	JMP	Ck_snd4		; done
 Snd_over:
 ;;; page 080 end
@@ -4937,7 +5090,9 @@ Snd_set:
 Sndrand:
 
 	STA	IN_DAT		;save decision
-	LDA	#Sound_ID		;which ram location for learned word count (offset)
+;;;<	LDA	#Sound_ID		;which ram location for learned word count (offset)
+;;;>	LDA	#Sound_ID		;which ram location for learned word count
+;;;>(offset)
 	JSR	Start_learn	;go record training info
 	LDA	IN_DAT		;get back word to speak
 
@@ -4964,14 +5119,22 @@ Sndrand:
 ; SENSOR TRAINING
 
 
-; Training for each sensor is set up here and the decision if the learned
+;;;<; Training for each sensor is set up here and the decision if the learned
+;;;>; Training for each sensor is set up here and the decision if the
 ;;; page 082 end
 ;;; page 083 start complete
+;;;>learned
 ; word should be played or not.
 ; Temp_ID hold the ram offset for the last sensor of the learned word.
-; Temp_ID2 hold the ram offset for the current sensor of the learned word.
-; IN_DAT holds the current word the sensor chose, and will be loaded with
-; the learned word instead if the sensor count > the random number that was
+;;;<; Temp_ID2 hold the ram offset for the current sensor of the learned word.
+;;;>; Temp_ID2 hold the ram offset for the current sensor of the learned
+;;;>word.
+;;;<; IN_DAT holds the current word the sensor chose, and will be loaded with
+;;;>; IN_DAT holds the current word the sensor chose, and will be loaded
+;;;>with
+;;;<; the learned word instead if the sensor count > the random number that was
+;;;>; the learned word instead if the sensor count > the random number that
+;;;>was
 ; just sampled, ie., force learned word to play.
 
 ; ****
@@ -4982,14 +5145,20 @@ Sndrand:
 
 
 ; When entering, check sensor timer and bail if 0. THen test if this is
-; the back switch and if so then move the current sensor to previous sensor
+;;;<; the back switch and if so then move the current sensor to previous sensor
+;;;>; the back switch and if so then move the current sensor to previous
+;;;>sensor
 ; ram and increment the counter.
-; If this is not the back switch, then get previous sensor ram counter and
+;;;<; If this is not the back switch, then get previous sensor ram counter and
+;;;>; If this is not the back switch, then get previous sensor ram counter
+;;;>and
 ; decrement it. THen move all current sensor information to previous and
 ; return to caller.
 
 ; Because of training difficulties, we now need two back touches to
-; increment training counters. If only one occurs then the normal decrement
+;;;<; increment training counters. If only one occurs then the normal decrement
+;;;>; increment training counters. If only one occurs then the normal
+;;;>decrement
 ; happens. This double back touch helps to prevent accidentally training
 ; with a new macro by hitting the back sw when it is not the macro you
 ; have been working with.
@@ -5011,7 +5180,9 @@ Not_BCK:
 	LDA	Tilt_learned,X	;get learned word counter from ram
 	CMP	Learn_temp	;compare with last word
 	BNE	Do_lrn2		;bail out if different
-	LDA	Tilt_lrn_cnt,X	;prev sensor counter +offset to current sensor
+;;;<	LDA	Tilt_lrn_cnt,X	;prev sensor counter +offset to current sensor
+;;;>	LDA	Tilt_lrn_cnt,X	;prev sensor counter +offset to current
+;;;>sensor
 	CLC
 	SBC	#Learn_chg	;dec learned word counter since not back sw
 	STA	Tilt_lrn_cnt,X	;update
@@ -5179,7 +5350,9 @@ Write_loop:
 ;	BCS	EEfail		;jump if bad
 
 	INC	Sgroup		;0-63 EEPROM adrs next
-	INC	Sgroup		;0-63 EEPROM adrs next (eeprom writes 2 bytes)
+;;;<	INC	Sgroup		;0-63 EEPROM adrs next (eeprom writes 2 bytes)
+;;;>	INC	Sgroup		;0-63 EEPROM adrs next (eeprom writes 2
+;;;>bytes)
 	INC	Which_motor	;next adrs
 	DEC	Which_delay	;how many to send
 	BNE	Write_loop	;send some more
@@ -5193,7 +5366,9 @@ Write_loop:
 
 S_EEPROM_READ:
 
-; Xreg is the adrs 0-63, system returns lo byte in Areg & hi byte in Xreg.
+;;;<; Xreg is the adrs 0-63, system returns lo byte in Areg & hi byte in Xreg.
+;;;>; Xreg is the adrs 0-63, system returns lo byte in Areg & hi byte in
+;;;>Xreg.
 
 ;     on call: X = EEPROM data address (0-63)
 ;     on return: ACC = EEPROM data (low byte)  (also in TEMP0)
@@ -5594,7 +5769,9 @@ Do_age:
 ; Enter with Xreg holding number of sequential selections
 ; It returns with Acc holding the random selection and the carry will
 ; be cleared for a sequential mode and set for a random mode.
-; NOTE: if the caller has no random selections then carry will be cleared.
+;;;<; NOTE: if the caller has no random selections then carry will be cleared.
+;;;>; NOTE: if the caller has no random selections then carry will be
+;;;>cleared.
 
 Ran_seq:
 	STA	TEMP1		;save random max
@@ -5689,7 +5866,9 @@ Life:
 ;Hungry >80 (Need_food) + Sick >C0 (Really_sick) = normal sensor
 ;Hungry >80 (Need_food) + Sick <C0 (Really_sick) = random SICK/SENSOR
 ;Hungry <80 (Need_food) + Sick >C0 (Really_sick) = random HUNGRY/SENSOR
-;Hungry <80 (Need_food) + Sick <C0 (Really_sick) = random HUNGRY/SICK/SENSOR
+;;;<;Hungry <80 (Need_food) + Sick <C0 (Really_sick) = random HUNGRY/SICK/SENSOR
+;;;>;Hungry <80 (Need_food) + Sick <C0 (Really_sick) = random
+;;;>HUNGRY/SICK/SENSOR
 ;Hungry <60 (Sick_reff) + Sick <C0 (Really_sick) = random HUNGRY/SICK
 
 ;Hungry >60 then each sensor motion increments Sick
@@ -5969,7 +6148,9 @@ IWrite_loop:
 ;	BCS	EEfail		;jump if bad
 
 	INC	Sgroup		;0-63 EEPROM adrs next
-	INC	Sgroup		;0-63 EEPROM adrs next     (eeprom writes 2 bytes)
+;;;<	INC	Sgroup		;0-63 EEPROM adrs next     (eeprom writes 2 bytes)
+;;;>	INC	Sgroup		;0-63 EEPROM adrs next     (eeprom writes 2
+;;;>bytes)
 	INC	Which_motor	;next adrs
 	DEC	Which_delay	;how many to send
 	BNE	IWrite_loop	;send some more
@@ -6354,9 +6535,12 @@ Xmit_TI:
 ; The first time thru, we call SAY_x and as long as WORD_ACTIV or SAY_ACTIV
 ; is set we call DO_NEXTSENT until saysent is done.
 
-; There are 4 groups of 128 pointers in each group. This gives 512 saysents.
+;;;<; There are 4 groups of 128 pointers in each group. This gives 512 saysents.
+;;;>; There are 4 groups of 128 pointers in each group. This gives 512
 ;;; page 105 end
 ;;; page 106 start complete
+;;;>saysents.
+
 ; 1. Enter with 'Which_word' holding 0-127 and 'Sgroup' for the 1 of 4 tables
 ;    which points to two byte adrs of a saysent. These two bytes are
 ;    loaded into Saysent_lo & Saysent_hi.
