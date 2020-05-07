@@ -9,8 +9,6 @@
 ;;; XXX Set_end
 ;;; XXX Spch_more
 ;;; XXX GBYTE
-;;; XXX Voice_table
-;;; XXX Name_table
 ;;; XXX
 ;;; XXX  cac I am not sure how Furby 27 gets included. XXX
 ;;; XXX  Included at end XXX
