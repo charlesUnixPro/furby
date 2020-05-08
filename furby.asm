@@ -922,7 +922,7 @@ Motor_led_timer	EQU	A0h	;how long after motion done led on for IR
 Mot_speed_cnt	EQU	A1h	;motor speed test
 Mot_opto_cnt	EQU	A2h	; "
 Cal_switch_cnt	EQU	A3h	;used to eliminate noisy reads
-motorstoped	equ	A4h	;times wheel count when stopping
+motorstoped	EQU	A4h	;times wheel count when stopping
 Drift_counter	EQU	A5h	;decides how much braking pulse to apply
 ;-------
 Mili_sec		EQU	A6h	;used in calc pot position by timer

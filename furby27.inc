@@ -6840,7 +6840,7 @@ Tbl3_say292:
 Tbl3_say293:
 	DB	46       ;speech speed
 	DB	Voice ;system pitch setting
-	DB	163,125,164,5,162,41                   ;S4-A1/S12-A1 SOUND js
+	DB	163,129,164,5,162,41                   ;S4-A1/S12-A1 SOUND js
 	DB	FFH    ;end
 ;
 Tbl3_say294:
