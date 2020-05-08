@@ -1,4 +1,7 @@
-all : FURBY.OBJ
+all : FURBY.HEX
+
+FURBY.HEX : FURBY.OBJ
+	dosbox -c "mount c ." -c "c:" -c "xlink FURBY.LNK" -c "exit"
 
 FURBY.OBJ : FURBY.ASM DIAG7.ASM FURBY27.INC IR2.ASM LIGHT5.ASM SLEEP.ASM WAKE2.ASM
 	dosbox -c "mount c ." -c "c:" -c "x6502 FURBY.ASM -D" -c "exit"
@@ -28,4 +31,4 @@ WAKE2.ASM : wake2.asm
 	sed < $< "/^;;;>/d" | sed "s/^;;;<//" > $@
 
 clean :
-	rm FURBY.OBJ FURBY.LST FURBY.ASM DIAG7.ASM FURBY27.INC IR2.ASM LIGHT5.ASM SLEEP.ASM WAKE2.ASM
+	-rm FURBY.HEX FURBY.OBJ FURBY.LST FURBY.ASM DIAG7.ASM FURBY27.INC IR2.ASM LIGHT5.ASM SLEEP.ASM WAKE2.ASM XMSWAP.TMP
