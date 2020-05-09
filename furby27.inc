@@ -1917,7 +1917,8 @@ Tbl1_Macro60:
 Tbl1_Macro61:
 	DW	001
 	DW	046
-	DW	047	SEQ13 FRONT AGE4
+;;;<	DW	047	;SEQ13 FRONT AGE4
+;;;>	DW	047	SEQ13 FRONT AGE4
 	DW	00	;end
 ;
 Tbl1_Macro62:
@@ -1927,7 +1928,8 @@ Tbl1_Macro62:
 ;
 Tbl1_Macro63:
 	DW	061
-	DW	003	SEQ15 FRONT AGE4
+;;;<	DW	003	;SEQ15 FRONT AGE4
+;;;>	DW	003	SEQ15 FRONT AGE4
 	DW	00	;end
 ;
 Tbl1_Macro64:
@@ -5455,7 +5457,8 @@ Tbl1_say098:
 	DB	100	;speech speed
 	DB	Voice+6	;system pitch setting
 	DB	140	;SEQ11 AND SEQ12 HANGING (SIGH)
-	DB	FFH   iend
+;;;<	DB	FFH   ;end
+;;;>	DB	FFH   iend
 ;
 Tbl1_say099:
 	DB	46	;speech speed
@@ -5494,13 +5497,16 @@ Tbl1_say104:
 	DB	FFH    ;end
 ;
 Tbl1_say105:
-	DB	46	{speech speed
+;;;<	DB	46	;speech speed
+;;;>	DB	46	{speech speed
 	DB	Voice ;system pitch setting
-	DB	63	{SEQ6 HANGING AGE3 (OK)
+;;;<	DB	63	;SEQ6 HANGING AGE3 (OK)
+;;;>	DB	63	{SEQ6 HANGING AGE3 (OK)
 	DB	FFH    ;end
 ;
 Tbl1_say106:
-	DB	46	.-speech speed
+;;;<	DB	46	;speech speed
+;;;>	DB	46	.-speech speed
 	DB	Voice ;system pitch setting
 	DB	13	;SEQ5 HANGING AGE3 AND 4
 	DB	FFH	;end
@@ -5981,8 +5987,9 @@ Tbl2_say167:                ;SG DONE
 	DB	8
 	DB	FFH    ;end
 
-Tbl2_say168:		;SG DONE   ;SAME AS SAY135 WITH DIFFERENT MOTOR
-POS.
+;;;<Tbl2_say168:		;SG DONE   ;SAME AS SAY135 WITH DIFFERENT MOTOR POS.
+;;;>Tbl2_say168:		;SG DONE   ;SAME AS SAY135 WITH DIFFERENT MOTOR
+;;;>POS.
 	DB	46      ;speech speed
 	DB	Voice ;system pitch setting
 	DB	35
@@ -6472,7 +6479,8 @@ Tbl2_say240:                ; SG DONE
 	DB	50       ;speech speed
 	DB	Voice ;system pitch setting
 	DB	30
-	DB	FFH     end
+;;;<	DB	FFH     ;end
+;;;>	DB	FFH     end
 ;Tbl1_say53
 ;Tbl1_say45:                ;SG DONE
 ;	DB	46        ;speech speed
@@ -6540,7 +6548,8 @@ Tbl2_say249:             ;SG DONE
 	DB	40      ;speech speed
 	DB	Voice-20   ;system pitch setting
 	DB	162,129
-	DB	FFH        z end
+;;;<	DB	FFH        ;end
+;;;>	DB	FFH        z end
 ;
 Tbl2_say250:              ;SG DONE
 	DB	100      ;speech speed
@@ -6794,13 +6803,15 @@ Tbl3_say286:
 	DB	FFH     ;end
 ;
 Tbl3_say287:
-	DB	70      (speech speed
+;;;<	DB	70      ;speech speed
+;;;>	DB	70      (speech speed
 	DB	Voice ;system pitch setting
 	DB	148,60,42,148
 	DB	FFH     ;end
 ;
 Tbl3_say288:
-	DB	46       (speech speed
+;;;<	DB	46       ;speech speed
+;;;>	DB	46       (speech speed
 	DB	Voice ;system pitch setting
 	DB	119,163,52,60,70,93      ;SEQ7 AGE4/SEQ15 AGE 4 LIGHT js
 	DB	FFH     ;end
@@ -7435,7 +7446,8 @@ Tbl4_say385:
 	DB	50      ;speech speed
 	DB	Voice+8   ;system pitch setting
 ;;; XXX semicolon missing
-	DB	119,44,52,71,150        seq10 ir age4
+;;;<	DB	119,44,52,71,150        ;seq10 ir age4
+;;;>	DB	119,44,52,71,150        seq10 ir age4
 ;;;<	DB	FFH     ;end    SAY NUMBERS MODIFIED TO MATCH CORRECT DIALOGUE
 ;;;>	DB	FFH     ;end    SAY NUMBERS MODIFIED TO MATCH CORRECT
 ;;; page 243 end
@@ -9069,7 +9081,8 @@ Tbl2_M176:                                 ;SG DONE
 Tbl2_M177:                               ;SG DONE
 	DB	1               ;motor delay between steps
 	DB	110,133,115,133
-	DB	FFH   I end
+;;;<	DB	FFH   ; end
+;;;>	DB	FFH   I end
 ;
 Tbl2_M178:                                ;SG DONE
 	DB	1                 ;motor delay between steps
@@ -9096,7 +9109,8 @@ Tbl2_M181:                                 ;SG DONE
 Tbl2_M182:                                ;SG DONE
 	DB	1                 ;motor delay between steps
 	DB	115,133
-	DB	FFH      end
+;;;<	DB	FFH     ;end
+;;;>	DB	FFH     end
 ;
 Tbl2_M183:                               ;SG DONE
 	DB	1               ;motor delay between steps
@@ -9253,7 +9267,8 @@ Tbl2_M210:                             ;SG DONE
 Tbl2_M211:                                     ;SG DONE
 	DB	1                    ;motor delay between steps
 	DB	75
-	DB	FFH         end
+;;;<	DB	FFH     ;end
+;;;>	DB	FFH     end
 ; danger
 Tbl2_M212:                                    ;SG DONE
 	DB	1                    ;motor delay between steps
@@ -9356,7 +9371,8 @@ Tbl2_M228:                            ;SG DONE
 	DB	FFH   ;end
 ;
 Tbl2_M229:                              ;SG DONE
-	DB	30               .-motor delay between steps
+;;;<	DB	30               ;motor delay between steps
+;;;>	DB	30               .-motor delay between steps
 ; DB	115,120,110,110,110,133
 	DB	115,120,110,0,0,133
 	DB	FFH     ;end
@@ -9716,7 +9732,8 @@ Tbl3_M292:
 	DB	FFH   ;end
 ;
 Tbl3_M293:
-	DB	15              .-motor delay between steps
+;;;<	DB	15              ;motor delay between steps
+;;;>	DB	15              .-motor delay between steps
 	DB	110,0,120,0,0,0,0,0
 	DB	145,0,0,0,155,115
 	DB	118,0,0,0,0,133         ;S4-A1/S12-A1 SOUND js
@@ -10196,7 +10213,8 @@ Tbl3_M364:
 	DB	125,113,125,118,105,133   ;seq1,2,3 ir age2
 	DB	FFh
 Tbl3_M365:
-	DB	10              .-motor delay between steps
+;;;<	DB	10              ;motor delay between steps
+;;;>	DB	10              .-motor delay between steps
 	DB	125,113,125,118,105,133   ;SEQ4,5 IR AGE2
 	DB	FFh
 
@@ -10435,7 +10453,8 @@ Tbl4_M403:
 	DB	FFH        ; end      ; fail beep
 ;
 Tbl4_M404:
-	DB	1                  .•motor delay between steps
+;;;<	DB	1                  ;motor delay between steps
+;;;>	DB	1                  .•motor delay between steps
 	DB	FFH        ; end
 ;
 Tbl4_M405:

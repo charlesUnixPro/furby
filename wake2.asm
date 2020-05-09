@@ -98,7 +98,7 @@ Power_Port_D:
 
 Power_battery:
 	LDA	#05h		;signal battery wakeup
-	STA	Warm_cold		:
+	STA	Warm_cold		;
 
 
 

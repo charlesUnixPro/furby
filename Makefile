@@ -1,10 +1,19 @@
 all : FURBY.HEX
 
+ifeq ($(AD),)
+# asmx toolchain
+
+FURBY.HEX : FURBY.ASM DIAG7.ASM FURBY27.INC IR2.ASM LIGHT5.ASM SLEEP.ASM WAKE2.ASM
+	asmx -C 6502 -w -e -o FURBY.HEX -l FURBY.LST FURBY.ASM
+else
+# 2500AD toolchain
+
 FURBY.HEX : FURBY.OBJ
 	dosbox -c "mount c ." -c "c:" -c "xlink FURBY.LNK" -c "exit"
 
 FURBY.OBJ : FURBY.ASM DIAG7.ASM FURBY27.INC IR2.ASM LIGHT5.ASM SLEEP.ASM WAKE2.ASM
 	dosbox -c "mount c ." -c "c:" -c "x6502 FURBY.ASM -D" -c "exit"
+endif
 
 %.ASM : %.asm
 	sed < $< "/^;;;>/d" | sed "s/^;;;<//" > $@
